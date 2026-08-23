@@ -30,8 +30,7 @@ object PowerCalculation {
      * @return Estimated power in microwatts, or null if either input is unavailable.
      */
     fun derivedPowerUw(voltageMv: Int?, currentNowUa: Int?): Long? {
-        if (voltageMv == null || currentNowUa == null) return null
-        return (voltageMv.toLong() * currentNowUa.toLong()) / 1_000L
+        return com.example.chargetrack.domain.power.BatteryPowerEstimator.calculatePowerUw(voltageMv, currentNowUa)
     }
 
     /**
