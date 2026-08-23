@@ -48,10 +48,10 @@ data class StandardTest(
      */
     val baselineSetAt: Instant? = null,
     /**
-     * Optional key grouping comparable tests (e.g. "wired-official-20-80").
-     * Tests in the same group are eligible for direct comparison.
+     * Key grouping comparable tests (e.g. "standard_20_80_wired_official").
+     * Tests in the same group are eligible for direct comparison. Must not be blank.
      */
-    val comparisonGroupKey: String? = null,
+    val comparisonGroupKey: String = "standard_20_80_wired_official",
     val validity: TestValidity = TestValidity.VALID,
     /** Required for QUESTIONABLE or INVALID tests; must be null for VALID tests. */
     val invalidationReason: String? = null
@@ -65,6 +65,9 @@ data class StandardTest(
         }
         require(targetEndPercent > targetStartPercent) {
             "targetEndPercent ($targetEndPercent) must be > targetStartPercent ($targetStartPercent)"
+        }
+        require(comparisonGroupKey.isNotBlank()) {
+            "comparisonGroupKey must not be blank"
         }
         if (isBaseline) {
             requireNotNull(baselineSetAt) {

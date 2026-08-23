@@ -81,6 +81,11 @@ class StandardTestValidationTest {
         test(validity = TestValidity.VALID, invalidationReason = "Should not be here")
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun `blank comparisonGroupKey throws`() {
+        StandardTest(sessionId = "session-1", comparisonGroupKey = "  ")
+    }
+
     @Test
     fun `QUESTIONABLE without reason is allowed (reason is optional)`() {
         assertNoThrow { test(validity = TestValidity.QUESTIONABLE, invalidationReason = null) }
