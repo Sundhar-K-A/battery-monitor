@@ -10,7 +10,7 @@ import java.time.Instant
 class BatterySampleTest {
 
     private fun sample(
-        percent: Int = 50,
+        percent: Int? = 50,
         voltageMv: Int? = null,
         currentNowUa: Int? = null,
         elapsedMs: Long = 0L,
@@ -39,9 +39,21 @@ class BatterySampleTest {
     }
 
     @Test
+    fun `percent defaults to null when not provided`() {
+        val s = BatterySample(
+            sessionId = "s",
+            timestamp = Instant.parse("2026-01-01T08:00:00Z"),
+            elapsedMs = 0L
+        )
+        assertNull("percent should default to null", s.percent)
+    }
+
+    @Test
     fun `qualityFlags defaults to empty set`() {
         assertTrue(sample().qualityFlags.isEmpty())
     }
+
+    // ── percent validation (when non-null) ────────────────────────────────
 
     @Test(expected = IllegalArgumentException::class)
     fun `percent below 0 throws`() { sample(percent = -1) }
@@ -54,6 +66,13 @@ class BatterySampleTest {
         assertNoThrow { sample(percent = 0) }
         assertNoThrow { sample(percent = 100) }
     }
+
+    @Test
+    fun `null percent is accepted (unavailable from BatteryManager)`() {
+        assertNoThrow { sample(percent = null) }
+    }
+
+    // ── elapsedMs validation ──────────────────────────────────────────────
 
     @Test(expected = IllegalArgumentException::class)
     fun `negative elapsedMs throws`() { sample(elapsedMs = -1L) }

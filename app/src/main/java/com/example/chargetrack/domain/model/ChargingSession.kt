@@ -8,13 +8,15 @@ import java.util.UUID
 /**
  * A bounded charging measurement event.
  *
- * [endedAt] is null while the session is still in progress.
- * [endPercent] is null if the session was interrupted before a final percentage was recorded.
- * [endReason] must be set when the session ends — never leave it null on a completed session.
+ * While the session is active: [endedAt], [endReason], and [endPercent] are all null.
+ * When the session completes: [endedAt] and [endReason] must both be set.
+ * [endPercent] may still be null on a completed session if the final percentage
+ * could not be recorded (e.g. service killed before last sample).
  *
  * Invariants enforced at construction:
  * - [startPercent] and [endPercent] must be in 0..100.
- * - If both [startedAt] and [endedAt] are set, [endedAt] must not precede [startedAt].
+ * - [endedAt] must not precede [startedAt].
+ * - [endedAt] and [endReason] must either both be present or both be absent.
  */
 data class ChargingSession(
     val id: String = UUID.randomUUID().toString(),
@@ -45,6 +47,10 @@ data class ChargingSession(
             require(!it.isBefore(startedAt)) {
                 "endedAt ($it) must not precede startedAt ($startedAt)"
             }
+        }
+        require((endedAt == null) == (endReason == null)) {
+            "endedAt and endReason must either both be present or both be absent. " +
+                "endedAt=$endedAt, endReason=$endReason"
         }
     }
 }

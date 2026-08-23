@@ -32,8 +32,15 @@ data class BatterySample(
     val timestamp: Instant,
     /** Monotonic elapsed milliseconds from session start. Must be >= 0. */
     val elapsedMs: Long,
-    /** Battery percentage: 0..100. */
-    val percent: Int,
+    /**
+     * Battery percentage reported by BatteryManager: 0..100.
+     * Null if percentage was unavailable at the time of sampling.
+     *
+     * **Rejection policy**: the sampling engine should add [QualityFlag.MISSING_REQUIRED_VALUE]
+     * when this is null. Whether to store or discard such a sample is a policy decision
+     * for the engine — this model accepts either choice without asserting.
+     */
+    val percent: Int? = null,
     /** Battery voltage in millivolts. Null if unavailable. */
     val voltageMv: Int? = null,
     /** Instantaneous battery current in microamperes. Null if unavailable. See class KDoc. */
@@ -62,7 +69,9 @@ data class BatterySample(
     val qualityFlags: Set<QualityFlag> = emptySet()
 ) {
     init {
-        require(percent in 0..100) { "percent must be in 0..100, was $percent" }
+        percent?.let {
+            require(it in 0..100) { "percent must be in 0..100, was $it" }
+        }
         require(elapsedMs >= 0) { "elapsedMs must be non-negative, was $elapsedMs" }
     }
 }
