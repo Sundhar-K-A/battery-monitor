@@ -1,0 +1,827 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "69ecdf73804eb5967faad75dfddeaea5",
+    "entities": [
+      {
+        "tableName": "device_profiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `manufacturer` TEXT NOT NULL, `brand` TEXT NOT NULL, `model` TEXT NOT NULL, `device` TEXT NOT NULL, `product` TEXT NOT NULL, `androidVersion` TEXT NOT NULL, `sdkInt` INTEGER NOT NULL, `buildFingerprint` TEXT NOT NULL, `buildDisplay` TEXT NOT NULL, `buildIncremental` TEXT NOT NULL, `originOsBuildLabel` TEXT, `matchedDeviceName` TEXT, `typicalCapacityMah` INTEGER, `ratedCapacityMah` INTEGER, `typicalEnergyWh` REAL, `ratedEnergyWh` REAL, `wiredReferenceW` INTEGER, `wirelessReferenceW` INTEGER, `nickname` TEXT, `purchaseDate` INTEGER, `firstUseDate` INTEGER, `ramStorageVariant` TEXT, `notes` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `isOnboardingComplete` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "manufacturer",
+            "columnName": "manufacturer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brand",
+            "columnName": "brand",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "model",
+            "columnName": "model",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "device",
+            "columnName": "device",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "product",
+            "columnName": "product",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "androidVersion",
+            "columnName": "androidVersion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdkInt",
+            "columnName": "sdkInt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildFingerprint",
+            "columnName": "buildFingerprint",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildDisplay",
+            "columnName": "buildDisplay",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildIncremental",
+            "columnName": "buildIncremental",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOsBuildLabel",
+            "columnName": "originOsBuildLabel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "matchedDeviceName",
+            "columnName": "matchedDeviceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "typicalCapacityMah",
+            "columnName": "typicalCapacityMah",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ratedCapacityMah",
+            "columnName": "ratedCapacityMah",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "typicalEnergyWh",
+            "columnName": "typicalEnergyWh",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "ratedEnergyWh",
+            "columnName": "ratedEnergyWh",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "wiredReferenceW",
+            "columnName": "wiredReferenceW",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "wirelessReferenceW",
+            "columnName": "wirelessReferenceW",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "nickname",
+            "columnName": "nickname",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "purchaseDate",
+            "columnName": "purchaseDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "firstUseDate",
+            "columnName": "firstUseDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ramStorageVariant",
+            "columnName": "ramStorageVariant",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isOnboardingComplete",
+            "columnName": "isOnboardingComplete",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "software_snapshots",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `capturedAt` INTEGER NOT NULL, `androidVersion` TEXT NOT NULL, `sdkInt` INTEGER NOT NULL, `originOsVersion` TEXT, `buildFingerprint` TEXT NOT NULL, `appVersionName` TEXT NOT NULL, `appVersionCode` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "capturedAt",
+            "columnName": "capturedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "androidVersion",
+            "columnName": "androidVersion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdkInt",
+            "columnName": "sdkInt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOsVersion",
+            "columnName": "originOsVersion",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "buildFingerprint",
+            "columnName": "buildFingerprint",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appVersionName",
+            "columnName": "appVersionName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appVersionCode",
+            "columnName": "appVersionCode",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_software_snapshots_capturedAt",
+            "unique": false,
+            "columnNames": [
+              "capturedAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_software_snapshots_capturedAt` ON `${TABLE_NAME}` (`capturedAt`)"
+          }
+        ]
+      },
+      {
+        "tableName": "charging_setups",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `chargerBrand` TEXT, `chargerModel` TEXT, `advertisedWattageW` INTEGER, `protocol` TEXT, `isOfficialCharger` INTEGER NOT NULL, `cableBrand` TEXT, `cableModel` TEXT, `isOfficialCable` INTEGER NOT NULL, `chargingType` TEXT NOT NULL, `chargingMode` TEXT NOT NULL, `notes` TEXT, `createdAt` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargerBrand",
+            "columnName": "chargerBrand",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "chargerModel",
+            "columnName": "chargerModel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "advertisedWattageW",
+            "columnName": "advertisedWattageW",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "protocol",
+            "columnName": "protocol",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isOfficialCharger",
+            "columnName": "isOfficialCharger",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cableBrand",
+            "columnName": "cableBrand",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cableModel",
+            "columnName": "cableModel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isOfficialCable",
+            "columnName": "isOfficialCable",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargingType",
+            "columnName": "chargingType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargingMode",
+            "columnName": "chargingMode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isTemplate",
+            "columnName": "isTemplate",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_charging_setups_isTemplate",
+            "unique": false,
+            "columnNames": [
+              "isTemplate"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_charging_setups_isTemplate` ON `${TABLE_NAME}` (`isTemplate`)"
+          }
+        ]
+      },
+      {
+        "tableName": "charging_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `startedAt` INTEGER NOT NULL, `endedAt` INTEGER, `startPercent` INTEGER NOT NULL, `endPercent` INTEGER, `chargingSetupId` TEXT NOT NULL, `softwareSnapshotId` TEXT NOT NULL, `testType` TEXT NOT NULL, `userNotes` TEXT, `endReason` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`chargingSetupId`) REFERENCES `charging_setups`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`softwareSnapshotId`) REFERENCES `software_snapshots`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "startedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAt",
+            "columnName": "endedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "startPercent",
+            "columnName": "startPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endPercent",
+            "columnName": "endPercent",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "chargingSetupId",
+            "columnName": "chargingSetupId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "softwareSnapshotId",
+            "columnName": "softwareSnapshotId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "testType",
+            "columnName": "testType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userNotes",
+            "columnName": "userNotes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endReason",
+            "columnName": "endReason",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_charging_sessions_startedAt",
+            "unique": false,
+            "columnNames": [
+              "startedAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_charging_sessions_startedAt` ON `${TABLE_NAME}` (`startedAt`)"
+          },
+          {
+            "name": "index_charging_sessions_chargingSetupId",
+            "unique": false,
+            "columnNames": [
+              "chargingSetupId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_charging_sessions_chargingSetupId` ON `${TABLE_NAME}` (`chargingSetupId`)"
+          },
+          {
+            "name": "index_charging_sessions_softwareSnapshotId",
+            "unique": false,
+            "columnNames": [
+              "softwareSnapshotId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_charging_sessions_softwareSnapshotId` ON `${TABLE_NAME}` (`softwareSnapshotId`)"
+          },
+          {
+            "name": "index_charging_sessions_testType",
+            "unique": false,
+            "columnNames": [
+              "testType"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_charging_sessions_testType` ON `${TABLE_NAME}` (`testType`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "charging_setups",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "chargingSetupId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "software_snapshots",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "softwareSnapshotId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "battery_samples",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `elapsedMs` INTEGER NOT NULL, `percent` INTEGER, `voltageMv` INTEGER, `currentNowUa` INTEGER, `currentAverageUa` INTEGER, `chargeCounterUah` INTEGER, `energyCounterNwh` INTEGER, `temperatureDeciC` INTEGER, `batteryStatus` INTEGER, `pluggedType` INTEGER, `cycleCount` INTEGER, `derivedPowerUw` INTEGER, `qualityFlags` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`sessionId`) REFERENCES `charging_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elapsedMs",
+            "columnName": "elapsedMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "percent",
+            "columnName": "percent",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "voltageMv",
+            "columnName": "voltageMv",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "currentNowUa",
+            "columnName": "currentNowUa",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "currentAverageUa",
+            "columnName": "currentAverageUa",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "chargeCounterUah",
+            "columnName": "chargeCounterUah",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "energyCounterNwh",
+            "columnName": "energyCounterNwh",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "temperatureDeciC",
+            "columnName": "temperatureDeciC",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "batteryStatus",
+            "columnName": "batteryStatus",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "pluggedType",
+            "columnName": "pluggedType",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cycleCount",
+            "columnName": "cycleCount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "derivedPowerUw",
+            "columnName": "derivedPowerUw",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "qualityFlags",
+            "columnName": "qualityFlags",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_battery_samples_sessionId",
+            "unique": false,
+            "columnNames": [
+              "sessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_battery_samples_sessionId` ON `${TABLE_NAME}` (`sessionId`)"
+          },
+          {
+            "name": "index_battery_samples_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_battery_samples_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          },
+          {
+            "name": "index_battery_samples_sessionId_elapsedMs",
+            "unique": true,
+            "columnNames": [
+              "sessionId",
+              "elapsedMs"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_battery_samples_sessionId_elapsedMs` ON `${TABLE_NAME}` (`sessionId`, `elapsedMs`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "charging_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sessionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "charge_transitions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `fromPercent` INTEGER NOT NULL, `toPercent` INTEGER NOT NULL, `startedAt` INTEGER NOT NULL, `endedAt` INTEGER NOT NULL, `durationMs` INTEGER NOT NULL, `averagePowerUw` INTEGER, `medianPowerUw` INTEGER, `peakPowerUw` INTEGER, `averageTemperatureDeciC` INTEGER, `maxTemperatureDeciC` INTEGER, `sampleCount` INTEGER NOT NULL, `quality` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`sessionId`) REFERENCES `charging_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromPercent",
+            "columnName": "fromPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toPercent",
+            "columnName": "toPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "startedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAt",
+            "columnName": "endedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationMs",
+            "columnName": "durationMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "averagePowerUw",
+            "columnName": "averagePowerUw",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "medianPowerUw",
+            "columnName": "medianPowerUw",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "peakPowerUw",
+            "columnName": "peakPowerUw",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "averageTemperatureDeciC",
+            "columnName": "averageTemperatureDeciC",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "maxTemperatureDeciC",
+            "columnName": "maxTemperatureDeciC",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sampleCount",
+            "columnName": "sampleCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quality",
+            "columnName": "quality",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_charge_transitions_sessionId",
+            "unique": false,
+            "columnNames": [
+              "sessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_charge_transitions_sessionId` ON `${TABLE_NAME}` (`sessionId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "charging_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sessionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "standard_tests",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `targetStartPercent` INTEGER NOT NULL, `targetEndPercent` INTEGER NOT NULL, `isBaseline` INTEGER NOT NULL, `baselineSetAt` INTEGER, `comparisonGroupKey` TEXT NOT NULL, `validity` TEXT NOT NULL, `invalidationReason` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`sessionId`) REFERENCES `charging_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetStartPercent",
+            "columnName": "targetStartPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetEndPercent",
+            "columnName": "targetEndPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isBaseline",
+            "columnName": "isBaseline",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baselineSetAt",
+            "columnName": "baselineSetAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "comparisonGroupKey",
+            "columnName": "comparisonGroupKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "validity",
+            "columnName": "validity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "invalidationReason",
+            "columnName": "invalidationReason",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_standard_tests_sessionId",
+            "unique": true,
+            "columnNames": [
+              "sessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_standard_tests_sessionId` ON `${TABLE_NAME}` (`sessionId`)"
+          },
+          {
+            "name": "index_standard_tests_comparisonGroupKey_isBaseline",
+            "unique": false,
+            "columnNames": [
+              "comparisonGroupKey",
+              "isBaseline"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_standard_tests_comparisonGroupKey_isBaseline` ON `${TABLE_NAME}` (`comparisonGroupKey`, `isBaseline`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "charging_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sessionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '69ecdf73804eb5967faad75dfddeaea5')"
+    ]
+  }
+}
