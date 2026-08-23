@@ -5,3 +5,4 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object Main        : NavKey
 @Serializable data object Diagnostics : NavKey
+@Serializable data object LiveSession : NavKey

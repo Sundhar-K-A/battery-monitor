@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.chargetrack.ui.diagnostics.DiagnosticsScreen
+import com.example.chargetrack.ui.live.LiveSessionScreen
 import com.example.chargetrack.ui.main.MainScreen
 
 @Composable
@@ -22,11 +23,17 @@ fun MainNavigation() {
             entry<Main> {
                 MainScreen(
                     onNavigateToDiagnostics = { backStack.add(Diagnostics) },
+                    onNavigateToLiveSession = { backStack.add(LiveSession) },
                     modifier = Modifier.safeDrawingPadding().padding(16.dp),
                 )
             }
             entry<Diagnostics> {
                 DiagnosticsScreen(
+                    onBack = { backStack.removeLastOrNull() },
+                )
+            }
+            entry<LiveSession> {
+                LiveSessionScreen(
                     onBack = { backStack.removeLastOrNull() },
                 )
             }

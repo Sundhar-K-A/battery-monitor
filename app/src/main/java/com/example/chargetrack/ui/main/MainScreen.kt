@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +25,7 @@ import com.example.chargetrack.theme.ChargeTrackTheme
 @Composable
 fun MainScreen(
     onNavigateToDiagnostics: () -> Unit,
+    onNavigateToLiveSession: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -48,6 +51,12 @@ fun MainScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(32.dp))
+        Button(onClick = onNavigateToLiveSession) {
+            Icon(Icons.Filled.Bolt, contentDescription = null)
+            Spacer(Modifier.padding(horizontal = 4.dp))
+            Text("Live Session")
+        }
+        Spacer(Modifier.height(12.dp))
         FilledTonalButton(onClick = onNavigateToDiagnostics) {
             Icon(Icons.Filled.BatteryChargingFull, contentDescription = null)
             Spacer(Modifier.padding(horizontal = 4.dp))
@@ -59,5 +68,10 @@ fun MainScreen(
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    ChargeTrackTheme { MainScreen(onNavigateToDiagnostics = {}) }
+    ChargeTrackTheme {
+        MainScreen(
+            onNavigateToDiagnostics = {},
+            onNavigateToLiveSession = {},
+        )
+    }
 }
