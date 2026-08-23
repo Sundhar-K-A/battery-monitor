@@ -5,6 +5,7 @@ ChargeTrack_iQOO15_Final/
 *.apk
 *.aar
 *.ap_
+*.zip
 
 # Files for the ART/Dalvik VM
 *.dex
