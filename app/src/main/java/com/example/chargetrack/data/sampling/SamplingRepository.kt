@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -31,6 +32,7 @@ class SamplingRepository @Inject constructor(
 
     val latestSample: StateFlow<BatterySample?> = batterySampler.latestSample
     val isSampling: StateFlow<Boolean> = batterySampler.isSampling
+    val sampleStream: SharedFlow<BatterySample> = batterySampler.sampleStream
 
     /**
      * Starts sampling and automatic Room persistence for the given [sessionId].

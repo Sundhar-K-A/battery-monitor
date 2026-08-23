@@ -37,5 +37,13 @@ object SessionModule {
         database: AppDatabase,
         config: SessionConfig,
         timeSource: TimeSource,
-    ): ChargingSessionRepository = ChargingSessionRepository(database, config, timeSource)
+        bootInfoProvider: com.example.chargetrack.domain.time.BootInfoProvider,
+        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context,
+    ): ChargingSessionRepository = ChargingSessionRepository(
+        database = database,
+        config = config,
+        timeSource = timeSource,
+        bootInfoProvider = bootInfoProvider,
+        context = context,
+    )
 }

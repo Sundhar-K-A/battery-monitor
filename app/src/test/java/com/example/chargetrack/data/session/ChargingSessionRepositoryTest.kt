@@ -14,8 +14,8 @@ import com.example.chargetrack.domain.model.ChargingSetup
 import com.example.chargetrack.domain.model.SoftwareSnapshot
 import com.example.chargetrack.domain.session.SessionConfig
 import com.example.chargetrack.domain.session.SessionState
+import com.example.chargetrack.domain.time.BootInfoProvider
 import com.example.chargetrack.domain.time.TimeSource
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -45,8 +45,14 @@ class ChargingSessionRepositoryTest {
         }
     }
 
+    private class FakeBootInfoProvider(var currentBootId: String = "boot-1") : BootInfoProvider {
+        override fun getBootId(): String = currentBootId
+    }
+
+    private lateinit var context: Context
     private lateinit var database: AppDatabase
     private lateinit var timeSource: TestTimeSource
+    private lateinit var bootInfoProvider: FakeBootInfoProvider
     private lateinit var repository: ChargingSessionRepository
 
     private val templateSetup = ChargingSetup(
@@ -92,16 +98,19 @@ class ChargingSessionRepositoryTest {
 
     @Before
     fun setUp() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
+        context = ApplicationProvider.getApplicationContext<Context>()
         database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
 
         timeSource = TestTimeSource()
+        bootInfoProvider = FakeBootInfoProvider("boot-session-1")
         repository = ChargingSessionRepository(
             database = database,
             config = SessionConfig(unplugDebounceMs = 5_000L),
             timeSource = timeSource,
+            bootInfoProvider = bootInfoProvider,
+            context = context,
         )
     }
 
@@ -181,10 +190,44 @@ class ChargingSessionRepositoryTest {
         assertEquals(timeSource.now(), dbSession?.endedAt)
     }
 
-    // ── Reboot recovery test ─────────────────────────────────────────────────
+    // ── Reboot vs Process Loss Recovery Tests ─────────────────────────────────
+
     @Test
-    fun `reboot recovery finalizes abandoned in-flight session with DEVICE_RESTARTED`() = runTest {
-        // Start a session
+    fun `evaluateOrphanedSessionEndReason returns DEVICE_RESTARTED when boot IDs mismatch`() {
+        val reason = ChargingSessionRepository.evaluateOrphanedSessionEndReason(
+            sessionStartBootId = "boot-old-123",
+            sessionStartRealtimeMs = 50_000L,
+            currentBootId = "boot-new-456",
+            currentElapsedRealtimeMs = 20_000L,
+        )
+        assertEquals(SessionEndReason.DEVICE_RESTARTED, reason)
+    }
+
+    @Test
+    fun `evaluateOrphanedSessionEndReason returns DEVICE_RESTARTED when monotonic clock is reset`() {
+        val reason = ChargingSessionRepository.evaluateOrphanedSessionEndReason(
+            sessionStartBootId = null, // boot ID unavailable
+            sessionStartRealtimeMs = 100_000L,
+            currentBootId = null,
+            currentElapsedRealtimeMs = 15_000L, // clock reset to 15s after reboot
+        )
+        assertEquals(SessionEndReason.DEVICE_RESTARTED, reason)
+    }
+
+    @Test
+    fun `evaluateOrphanedSessionEndReason returns MEASUREMENT_LOST when same boot and clock advanced`() {
+        val reason = ChargingSessionRepository.evaluateOrphanedSessionEndReason(
+            sessionStartBootId = "boot-same-123",
+            sessionStartRealtimeMs = 50_000L,
+            currentBootId = "boot-same-123",
+            currentElapsedRealtimeMs = 80_000L, // same boot, clock advanced
+        )
+        assertEquals(SessionEndReason.MEASUREMENT_LOST, reason)
+    }
+
+    @Test
+    fun `recoverOrFinalizeOrphanedSession assigns DEVICE_RESTARTED on actual reboot`() = runTest {
+        // 1. Start a session on boot-1 with startRealtimeMs = 100_000L
         val startResult = repository.startSession(
             snapshot = createChargingSnapshot(percent = 20),
             setup = templateSetup,
@@ -192,25 +235,61 @@ class ChargingSessionRepositoryTest {
         )
         val session = startResult.getOrThrow()
 
-        // Simulate app restart / device reboot by creating new repository instance over same DB
+        // 2. Simulate reboot with new bootId and reset monotonic clock
         val rebootedTimeSource = TestTimeSource(
             currentInstant = Instant.parse("2026-08-23T11:00:00Z"),
-            currentRealtimeMs = 10_000L, // New monotonic timeline after reboot
+            currentRealtimeMs = 15_000L, // Reset to 15s
         )
-        val newRepository = ChargingSessionRepository(
+        val rebootedBootProvider = FakeBootInfoProvider("boot-2-after-reboot")
+        val recoveryRepository = ChargingSessionRepository(
             database = database,
             config = SessionConfig(),
             timeSource = rebootedTimeSource,
+            bootInfoProvider = rebootedBootProvider,
+            context = context,
         )
 
-        // Recover abandoned session
-        val recovered = newRepository.recoverOrFinalizeRebootedSession()
+        // 3. Recover session
+        val recovered = recoveryRepository.recoverOrFinalizeOrphanedSession()
         assertNotNull(recovered)
         assertEquals(session.id, recovered?.id)
         assertEquals(SessionEndReason.DEVICE_RESTARTED, recovered?.endReason)
 
-        // Verify database is cleaned up (no active sessions left)
-        val activeInDb = database.chargingSessionDao().getActiveSession()
-        assertNull(activeInDb)
+        // Database cleaned up
+        assertNull(database.chargingSessionDao().getActiveSession())
+    }
+
+    @Test
+    fun `recoverOrFinalizeOrphanedSession assigns MEASUREMENT_LOST on process death in same boot`() = runTest {
+        // 1. Start a session on boot-1 with startRealtimeMs = 100_000L
+        val startResult = repository.startSession(
+            snapshot = createChargingSnapshot(percent = 20),
+            setup = templateSetup,
+            softwareSnapshot = softwareSnapshot,
+        )
+        val session = startResult.getOrThrow()
+
+        // 2. Simulate process death in same boot (same bootId, clock advanced to 150_000L)
+        val sameBootTimeSource = TestTimeSource(
+            currentInstant = Instant.parse("2026-08-23T10:05:00Z"),
+            currentRealtimeMs = 150_000L,
+        )
+        val sameBootProvider = FakeBootInfoProvider("boot-session-1")
+        val recoveryRepository = ChargingSessionRepository(
+            database = database,
+            config = SessionConfig(),
+            timeSource = sameBootTimeSource,
+            bootInfoProvider = sameBootProvider,
+            context = context,
+        )
+
+        // 3. Recover session
+        val recovered = recoveryRepository.recoverOrFinalizeOrphanedSession()
+        assertNotNull(recovered)
+        assertEquals(session.id, recovered?.id)
+        assertEquals(SessionEndReason.MEASUREMENT_LOST, recovered?.endReason)
+
+        // Database cleaned up
+        assertNull(database.chargingSessionDao().getActiveSession())
     }
 }
