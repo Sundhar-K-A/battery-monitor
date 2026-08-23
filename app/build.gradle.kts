@@ -63,6 +63,7 @@ dependencies {
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.material3)
+  implementation(libs.androidx.compose.material.icons.extended)
   // Tooling
   debugImplementation(libs.androidx.compose.ui.tooling)
   // Instrumented tests
@@ -82,6 +83,7 @@ dependencies {
 
   // Hilt
   implementation(libs.hilt.android)
+  implementation(libs.hilt.navigation.compose)
   ksp(libs.hilt.android.compiler)
   androidTestImplementation(libs.hilt.android.testing)
   kspAndroidTest(libs.hilt.android.compiler)
