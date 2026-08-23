@@ -76,6 +76,8 @@ class ChargingSessionRepository @Inject constructor(
         softwareSnapshot: SoftwareSnapshot,
         testType: TestType = TestType.FREE_FORM,
         userNotes: String? = null,
+        targetStartPercent: Int = 20,
+        targetEndPercent: Int = 80,
         comparisonGroupKey: String = "standard_20_80_wired_official",
     ): Result<ChargingSession> = mutex.withLock {
         val currentState = _sessionState.value
@@ -112,8 +114,8 @@ class ChargingSessionRepository @Inject constructor(
                     val standardTest = StandardTestEntity(
                         id = UUID.randomUUID().toString(),
                         sessionId = updatedSession.id,
-                        targetStartPercent = 20,
-                        targetEndPercent = 80,
+                        targetStartPercent = targetStartPercent,
+                        targetEndPercent = targetEndPercent,
                         comparisonGroupKey = comparisonGroupKey,
                     )
                     database.standardTestDao().insert(standardTest)

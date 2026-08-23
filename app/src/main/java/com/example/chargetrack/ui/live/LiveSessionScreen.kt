@@ -30,6 +30,8 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -86,6 +89,7 @@ private val MutedText = Color(0xFF8E9BAE)
 @Composable
 fun LiveSessionScreen(
     onBack: () -> Unit,
+    onNavigateToCharts: ((String) -> Unit)? = null,
     viewModel: LiveSessionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -109,6 +113,8 @@ fun LiveSessionScreen(
         onBack = onBack,
         onStopSession = { viewModel.stopSession() },
         onResetSession = { viewModel.resetSession() },
+        onDismissTargetReachedDialog = { viewModel.dismissTargetReachedDialog() },
+        onNavigateToCharts = onNavigateToCharts,
     )
 }
 
@@ -119,6 +125,8 @@ fun LiveSessionContent(
     onBack: () -> Unit,
     onStopSession: () -> Unit,
     onResetSession: () -> Unit,
+    onDismissTargetReachedDialog: () -> Unit = {},
+    onNavigateToCharts: ((String) -> Unit)? = null,
 ) {
     Scaffold(
         containerColor = DarkBackground,
@@ -167,12 +175,55 @@ fun LiveSessionContent(
                         state = uiState,
                         onStopSession = onStopSession,
                     )
+
+                    if (uiState.showTargetReachedDialog) {
+                        val targetPct = uiState.standardTestInfo?.targetEndPercent ?: 80
+                        AlertDialog(
+                            onDismissRequest = onDismissTargetReachedDialog,
+                            title = {
+                                Text(
+                                    "Target Reached ($targetPct%)!",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            text = {
+                                Text(
+                                    "The Standard Test benchmark is complete. Would you like to stop recording and finalize the test, or continue recording?",
+                                    color = Color(0xFF8C9BAE),
+                                )
+                            },
+                            confirmButton = {
+                                Button(
+                                    onClick = onStopSession,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = AmberAccent,
+                                        contentColor = Color.Black,
+                                    ),
+                                ) {
+                                    Text("Stop & Save Test", fontWeight = FontWeight.Bold)
+                                }
+                            },
+                            dismissButton = {
+                                OutlinedButton(
+                                    onClick = onDismissTargetReachedDialog,
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = Color.White,
+                                    ),
+                                ) {
+                                    Text("Continue Recording")
+                                }
+                            },
+                            containerColor = CardSurface,
+                        )
+                    }
                 }
 
                 is LiveSessionUiState.SessionEnded -> {
                     SessionEndedView(
                         state = uiState,
                         onResetSession = onResetSession,
+                        onNavigateToCharts = onNavigateToCharts,
                     )
                 }
             }
@@ -242,6 +293,15 @@ private fun ActiveSessionView(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        state.standardTestInfo?.let { stdInfo ->
+            item {
+                StandardTestBannerCard(
+                    info = stdInfo,
+                    currentPercent = state.currentPercent,
+                )
+            }
+        }
+
         item {
             // 1. Status & Percentage Card
             Card(
@@ -418,6 +478,7 @@ private fun ActiveSessionView(
 private fun SessionEndedView(
     state: LiveSessionUiState.SessionEnded,
     onResetSession: () -> Unit,
+    onNavigateToCharts: ((String) -> Unit)? = null,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -530,6 +591,24 @@ private fun SessionEndedView(
 
         item {
             Spacer(Modifier.height(8.dp))
+            onNavigateToCharts?.let { navigate ->
+                Button(
+                    onClick = { navigate(state.session.id) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AmberAccent,
+                        contentColor = Color.Black,
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Icon(Icons.Filled.Bolt, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("View Session Charts", fontWeight = FontWeight.Bold)
+                }
+                Spacer(Modifier.height(8.dp))
+            }
             FilledTonalButton(
                 onClick = onResetSession,
                 modifier = Modifier
@@ -731,3 +810,63 @@ private fun formatDuration(durationMs: Long): String {
         "${seconds}s"
     }
 }
+
+@Composable
+private fun StandardTestBannerCard(
+    info: StandardTestProgressInfo,
+    currentPercent: Int?,
+) {
+    val progress = if (currentPercent != null && info.targetEndPercent > info.targetStartPercent) {
+        ((currentPercent - info.targetStartPercent).toFloat() / (info.targetEndPercent - info.targetStartPercent)).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = CardSurface),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, CardBorder, RoundedCornerShape(16.dp)),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    "Standard Test: ${info.targetStartPercent}% → ${info.targetEndPercent}%",
+                    color = AmberAccent,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                )
+                Text(
+                    when {
+                        info.isTargetReached -> "Target Reached"
+                        info.isArmed -> "Armed (Waiting for ${info.targetStartPercent}%)"
+                        else -> "Benchmark Active"
+                    },
+                    color = when {
+                        info.isTargetReached -> StatusGreen
+                        info.isArmed -> StatusAmber
+                        else -> AmberAccent
+                    },
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = if (info.isTargetReached) StatusGreen else AmberAccent,
+                trackColor = CardBorder,
+            )
+        }
+    }
+}
+

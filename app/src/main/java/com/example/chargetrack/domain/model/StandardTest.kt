@@ -54,7 +54,11 @@ data class StandardTest(
     val comparisonGroupKey: String = "standard_20_80_wired_official",
     val validity: TestValidity = TestValidity.VALID,
     /** Required for QUESTIONABLE or INVALID tests; must be null for VALID tests. */
-    val invalidationReason: String? = null
+    val invalidationReason: String? = null,
+    /** Monotonic elapsed milliseconds from session start when benchmark window began (e.g. at targetStartPercent). */
+    val benchmarkStartedElapsedMs: Long? = null,
+    /** Monotonic elapsed milliseconds from session start when targetEndPercent was reached. */
+    val benchmarkEndedElapsedMs: Long? = null,
 ) {
     init {
         require(targetStartPercent in 0..99) {

@@ -254,6 +254,8 @@ fun StandardTest.toEntity(): StandardTestEntity =
         comparisonGroupKey = comparisonGroupKey,
         validity = validity,
         invalidationReason = invalidationReason,
+        benchmarkStartedElapsedMs = benchmarkStartedElapsedMs,
+        benchmarkEndedElapsedMs = benchmarkEndedElapsedMs,
     )
 
 fun StandardTestEntity.toDomain(): StandardTest =
@@ -267,4 +269,6 @@ fun StandardTestEntity.toDomain(): StandardTest =
         comparisonGroupKey = comparisonGroupKey,
         validity = validity,
         invalidationReason = invalidationReason,
+        benchmarkStartedElapsedMs = benchmarkStartedElapsedMs,
+        benchmarkEndedElapsedMs = benchmarkEndedElapsedMs,
     )

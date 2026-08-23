@@ -159,6 +159,7 @@ class LiveSessionViewModelTest {
         viewModel = LiveSessionViewModel(
             sessionRepository = sessionRepository,
             samplingRepository = samplingRepository,
+            database = database,
             timeSource = timeSource,
         )
     }
@@ -551,6 +552,107 @@ class LiveSessionViewModelTest {
         // 0 completed transitions
         assertEquals(0, activeState.completedTransitions.size)
 
+        viewModel.stopSession()
+        testScheduler.runCurrent()
+    }
+
+    @Test
+    fun `standard test arms below start target and records exact sample elapsedMs at start boundary`() = testScope.runTest {
+        testScheduler.runCurrent()
+
+        val initialSnapshot = createChargingSnapshot(percent = 18)
+        fakeBatteryDataSource.currentSnapshot = initialSnapshot
+
+        // Start session at 18% with target 20% -> 80%
+        val session = sessionRepository.startSession(
+            snapshot = initialSnapshot,
+            setup = templateSetup,
+            softwareSnapshot = createSoftwareSnapshot(),
+            testType = TestType.STANDARD,
+            targetStartPercent = 20,
+            targetEndPercent = 80,
+            comparisonGroupKey = "standard_20_80_wired_official",
+        ).getOrThrow()
+
+        samplingRepository.startSampling(session.id, timeSource.elapsedRealtime(), this)
+        testScheduler.runCurrent()
+
+        var activeState = viewModel.uiState.value as LiveSessionUiState.Active
+        assertNotNull(activeState.standardTestInfo)
+        assertTrue(activeState.standardTestInfo!!.isArmed)
+        assertFalse(activeState.standardTestInfo!!.isBenchmarkActive)
+        assertNull(activeState.standardTestInfo!!.benchmarkStartedElapsedMs)
+
+        // Advance 15 seconds and step up to 20% -> Activates benchmark
+        timeSource.advanceSeconds(15)
+        fakeBatteryDataSource.currentSnapshot = createChargingSnapshot(percent = 20)
+        advanceTimeBy(15_000L)
+        testScheduler.runCurrent()
+
+        activeState = viewModel.uiState.value as LiveSessionUiState.Active
+        assertFalse(activeState.standardTestInfo!!.isArmed)
+        assertTrue(activeState.standardTestInfo!!.isBenchmarkActive)
+        assertEquals(15_000L, activeState.standardTestInfo!!.benchmarkStartedElapsedMs)
+
+        samplingRepository.stopSampling()
+        viewModel.stopSession()
+        testScheduler.runCurrent()
+    }
+
+    @Test
+    fun `target reached triggers dialog once and percentage jitter does not retrigger dialog`() = testScope.runTest {
+        testScheduler.runCurrent()
+
+        val initialSnapshot = createChargingSnapshot(percent = 20)
+        fakeBatteryDataSource.currentSnapshot = initialSnapshot
+
+        val session = sessionRepository.startSession(
+            snapshot = initialSnapshot,
+            setup = templateSetup,
+            softwareSnapshot = createSoftwareSnapshot(),
+            testType = TestType.STANDARD,
+            targetStartPercent = 20,
+            targetEndPercent = 80,
+            comparisonGroupKey = "standard_20_80_wired_official",
+        ).getOrThrow()
+
+        samplingRepository.startSampling(session.id, timeSource.elapsedRealtime(), this)
+        testScheduler.runCurrent()
+
+        // Advance 60s and reach 80%
+        timeSource.advanceSeconds(60)
+        fakeBatteryDataSource.currentSnapshot = createChargingSnapshot(percent = 80)
+        advanceTimeBy(60_000L)
+        testScheduler.runCurrent()
+
+        var activeState = viewModel.uiState.value as LiveSessionUiState.Active
+        assertTrue("Dialog should be shown when target reached", activeState.showTargetReachedDialog)
+        assertTrue(activeState.standardTestInfo!!.isTargetReached)
+        assertEquals(60_000L, activeState.standardTestInfo!!.benchmarkEndedElapsedMs)
+
+        // Dismiss dialog to continue recording
+        viewModel.dismissTargetReachedDialog()
+        testScheduler.runCurrent()
+
+        activeState = viewModel.uiState.value as LiveSessionUiState.Active
+        assertFalse("Dialog must be dismissed", activeState.showTargetReachedDialog)
+
+        // Jitter: drops to 79% then back to 80%
+        timeSource.advanceSeconds(5)
+        fakeBatteryDataSource.currentSnapshot = createChargingSnapshot(percent = 79)
+        advanceTimeBy(5_000L)
+        testScheduler.runCurrent()
+
+        timeSource.advanceSeconds(5)
+        fakeBatteryDataSource.currentSnapshot = createChargingSnapshot(percent = 80)
+        advanceTimeBy(5_000L)
+        testScheduler.runCurrent()
+
+        activeState = viewModel.uiState.value as LiveSessionUiState.Active
+        assertFalse("Jitter back to 80% must NOT re-trigger the target dialog", activeState.showTargetReachedDialog)
+        assertEquals("Original benchmarkEndedElapsedMs must remain frozen at 60_000L", 60_000L, activeState.standardTestInfo!!.benchmarkEndedElapsedMs)
+
+        samplingRepository.stopSampling()
         viewModel.stopSession()
         testScheduler.runCurrent()
     }

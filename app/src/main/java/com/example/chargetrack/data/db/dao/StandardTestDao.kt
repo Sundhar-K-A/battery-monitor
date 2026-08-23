@@ -46,6 +46,12 @@ interface StandardTestDao {
         setBaseline(testId, baselineSetAt)
     }
 
+    @Query("UPDATE standard_tests SET benchmarkStartedElapsedMs = :elapsedMs WHERE sessionId = :sessionId")
+    suspend fun updateBenchmarkStart(sessionId: String, elapsedMs: Long)
+
+    @Query("UPDATE standard_tests SET benchmarkEndedElapsedMs = :elapsedMs WHERE sessionId = :sessionId")
+    suspend fun updateBenchmarkEnd(sessionId: String, elapsedMs: Long)
+
     @Query("DELETE FROM standard_tests WHERE id = :id")
     suspend fun delete(id: String)
 }

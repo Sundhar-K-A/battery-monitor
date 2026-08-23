@@ -33,4 +33,6 @@ data class StandardTestEntity(
     val comparisonGroupKey: String = "standard_20_80_wired_official",
     val validity: TestValidity = TestValidity.VALID,
     val invalidationReason: String? = null,
+    val benchmarkStartedElapsedMs: Long? = null,
+    val benchmarkEndedElapsedMs: Long? = null,
 )

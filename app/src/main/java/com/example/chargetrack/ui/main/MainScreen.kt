@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,6 +29,7 @@ import com.example.chargetrack.theme.ChargeTrackTheme
 fun MainScreen(
     onNavigateToDiagnostics: () -> Unit,
     onNavigateToLiveSession: () -> Unit,
+    onNavigateToStandardTest: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -51,6 +55,18 @@ fun MainScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(32.dp))
+        Button(
+            onClick = onNavigateToStandardTest,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFFFB300),
+                contentColor = Color.Black,
+            ),
+        ) {
+            Icon(Icons.Filled.Speed, contentDescription = null)
+            Spacer(Modifier.padding(horizontal = 4.dp))
+            Text("Standard Test (20% → 80%)", fontWeight = FontWeight.Bold)
+        }
+        Spacer(Modifier.height(12.dp))
         Button(onClick = onNavigateToLiveSession) {
             Icon(Icons.Filled.Bolt, contentDescription = null)
             Spacer(Modifier.padding(horizontal = 4.dp))
@@ -72,6 +88,7 @@ fun MainScreenPreview() {
         MainScreen(
             onNavigateToDiagnostics = {},
             onNavigateToLiveSession = {},
+            onNavigateToStandardTest = {},
         )
     }
 }

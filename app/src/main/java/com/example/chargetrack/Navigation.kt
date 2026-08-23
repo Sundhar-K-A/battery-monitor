@@ -11,6 +11,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.chargetrack.ui.diagnostics.DiagnosticsScreen
 import com.example.chargetrack.ui.live.LiveSessionScreen
 import com.example.chargetrack.ui.main.MainScreen
+import com.example.chargetrack.ui.standardtest.StandardTestConfigScreen
 
 @Composable
 fun MainNavigation() {
@@ -24,6 +25,7 @@ fun MainNavigation() {
                 MainScreen(
                     onNavigateToDiagnostics = { backStack.add(Diagnostics) },
                     onNavigateToLiveSession = { backStack.add(LiveSession) },
+                    onNavigateToStandardTest = { backStack.add(StandardTestConfig) },
                     modifier = Modifier.safeDrawingPadding().padding(16.dp),
                 )
             }
@@ -35,6 +37,22 @@ fun MainNavigation() {
             entry<LiveSession> {
                 LiveSessionScreen(
                     onBack = { backStack.removeLastOrNull() },
+                    onNavigateToCharts = { sessionId -> backStack.add(SessionCharts(sessionId)) },
+                )
+            }
+            entry<StandardTestConfig> {
+                StandardTestConfigScreen(
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                    onNavigateToLiveSession = {
+                        backStack.removeLastOrNull() // pop config
+                        backStack.add(LiveSession) // push live session
+                    },
+                )
+            }
+            entry<SessionCharts> { key ->
+                com.example.chargetrack.ui.charts.SessionChartsScreen(
+                    sessionId = key.sessionId,
+                    onNavigateBack = { backStack.removeLastOrNull() },
                 )
             }
         },

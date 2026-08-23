@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "69ecdf73804eb5967faad75dfddeaea5",
+    "identityHash": "554b678e4562cafe425dd60d64024f9c",
     "entities": [
       {
         "tableName": "device_profiles",
@@ -722,7 +722,7 @@
       },
       {
         "tableName": "standard_tests",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `targetStartPercent` INTEGER NOT NULL, `targetEndPercent` INTEGER NOT NULL, `isBaseline` INTEGER NOT NULL, `baselineSetAt` INTEGER, `comparisonGroupKey` TEXT NOT NULL, `validity` TEXT NOT NULL, `invalidationReason` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`sessionId`) REFERENCES `charging_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `targetStartPercent` INTEGER NOT NULL, `targetEndPercent` INTEGER NOT NULL, `isBaseline` INTEGER NOT NULL, `baselineSetAt` INTEGER, `comparisonGroupKey` TEXT NOT NULL, `validity` TEXT NOT NULL, `invalidationReason` TEXT, `benchmarkStartedElapsedMs` INTEGER, `benchmarkEndedElapsedMs` INTEGER, PRIMARY KEY(`id`), FOREIGN KEY(`sessionId`) REFERENCES `charging_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -775,6 +775,16 @@
             "fieldPath": "invalidationReason",
             "columnName": "invalidationReason",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "benchmarkStartedElapsedMs",
+            "columnName": "benchmarkStartedElapsedMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "benchmarkEndedElapsedMs",
+            "columnName": "benchmarkEndedElapsedMs",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -821,7 +831,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '69ecdf73804eb5967faad75dfddeaea5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '554b678e4562cafe425dd60d64024f9c')"
     ]
   }
 }

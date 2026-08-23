@@ -45,6 +45,8 @@ sealed interface LiveSessionUiState {
         val qualityFlags: Set<QualityFlag> = emptySet(),
         val sampleCount: Int = 1,
         val completedTransitions: List<ChargeTransition> = emptyList(),
+        val standardTestInfo: StandardTestProgressInfo? = null,
+        val showTargetReachedDialog: Boolean = false,
     ) : LiveSessionUiState
 
     /**
@@ -64,5 +66,19 @@ sealed interface LiveSessionUiState {
         val endReason: SessionEndReason,
         val completedTransitions: List<ChargeTransition> = emptyList(),
         val partialTransitionInfo: PartialTransitionInfo? = null,
+        val standardTestInfo: StandardTestProgressInfo? = null,
     ) : LiveSessionUiState
 }
+
+/**
+ * Benchmark progress state for a Standard Test session.
+ */
+data class StandardTestProgressInfo(
+    val targetStartPercent: Int,
+    val targetEndPercent: Int,
+    val isArmed: Boolean,
+    val isBenchmarkActive: Boolean,
+    val isTargetReached: Boolean,
+    val benchmarkStartedElapsedMs: Long? = null,
+    val benchmarkEndedElapsedMs: Long? = null,
+)
