@@ -40,6 +40,37 @@ class DeviceIdentifierTest {
         assertTrue(DeviceIdentifier.isIqoo15(BuildInfoFakes.iqoo15(model = "  iQOO 15  ")))
     }
 
+    @Test
+    fun `physical iQOO 15 telemetry matches IQOO_15`() {
+        val physicalDeviceBuild = BuildInfo(
+            manufacturer = "vivo",
+            brand = "vivo",
+            model = "I2501",
+            device = "I2501",
+            product = "I2501i",
+            androidVersionRelease = "16",
+            sdkInt = 36,
+            buildFingerprint = "vivo/I2501i/I2501:16/PD2505CF_EX_A_16.0.22.3.W30/compiler260616230953:user/release-keys",
+            buildDisplay = "PD2505CF_EX_A_16.0.22.3.W30",
+            buildIncremental = "compiler260616230953",
+        )
+        assertEquals(DeviceIdentifier.KnownDevice.IQOO_15, DeviceIdentifier.identify(physicalDeviceBuild))
+        assertTrue(DeviceIdentifier.isIqoo15(physicalDeviceBuild))
+    }
+
+    @Test
+    fun `physical iQOO 15 with brand iQOO and model I2501 matches IQOO_15`() {
+        val build = BuildInfoFakes.iqoo15(
+            manufacturer = "vivo",
+            brand = "iQOO",
+            model = "I2501",
+            device = "I2501",
+            product = "I2501i",
+        )
+        assertEquals(DeviceIdentifier.KnownDevice.IQOO_15, DeviceIdentifier.identify(build))
+        assertTrue(DeviceIdentifier.isIqoo15(build))
+    }
+
     // ── iQOO 15 negative matches ──────────────────────────────────────────
 
     @Test

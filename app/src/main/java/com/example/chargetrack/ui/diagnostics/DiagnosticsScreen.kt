@@ -96,10 +96,14 @@ fun DiagnosticsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = Color(0xFF000000),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White,
                 ),
             )
         },
+        containerColor = Color(0xFF000000),
         modifier = modifier,
     ) { paddingValues ->
         AnimatedContent(
@@ -165,7 +169,13 @@ private fun ReadyContent(state: DiagnosticsUiState.Ready, padding: PaddingValues
                 qualityFlags = state.snapshot.qualityFlags.joinToString { it.name },
             )
         }
-        item { StickyIntentCard(state.snapshot) }
+        item {
+            StickyIntentCard(
+                snapshot = state.snapshot,
+                healthEstimate = state.healthEstimate,
+                referenceCapacityMah = state.referenceCapacityMah,
+            )
+        }
         item { BatteryManagerCard(state.snapshot) }
         item { Spacer(Modifier.height(32.dp)) }
     }
@@ -248,15 +258,31 @@ private fun DeviceInfoRow(label: String, value: String, monospace: Boolean = fal
 // ── Measurement cards ─────────────────────────────────────────────────────────
 
 @Composable
-private fun StickyIntentCard(snapshot: BatterySnapshot) {
-    MeasurementCard(title = "Sticky Intent  (ACTION_BATTERY_CHANGED)", sourceColor = SourceIntent) {
-        PropertyRow("Percentage",   DiagnosticsFormatter.formatPercent(snapshot.percent),       snapshot.percent != null,  "Sticky Intent")
-        PropertyRow("Voltage",      DiagnosticsFormatter.formatVoltage(snapshot.voltageMv),     snapshot.voltageMv != null, "Sticky Intent")
-        PropertyRow("Temperature",  DiagnosticsFormatter.formatTemperature(snapshot.temperatureDeciC), snapshot.temperatureDeciC != null, "Sticky Intent")
-        PropertyRow("Status",       DiagnosticsFormatter.formatStatus(snapshot.batteryStatus),  snapshot.batteryStatus != null, "Sticky Intent")
-        PropertyRow("Plugged type", DiagnosticsFormatter.formatPlugged(snapshot.pluggedType),   snapshot.pluggedType != null, "Sticky Intent")
-        PropertyRow("Health",       DiagnosticsFormatter.formatHealth(snapshot.health),         snapshot.health != null,   "Sticky Intent")
-        PropertyRow("Cycle count",  DiagnosticsFormatter.formatCycleCount(snapshot.cycleCount), snapshot.cycleCount != null, "Sticky Intent  (API 34+)")
+private fun StickyIntentCard(
+    snapshot: BatterySnapshot,
+    healthEstimate: com.example.chargetrack.domain.health.BatteryHealthEstimate,
+    referenceCapacityMah: Int?,
+) {
+    MeasurementCard(title = "Battery & Health  (Sticky Intent + ChargeTrack)", sourceColor = SourceIntent) {
+        PropertyRow("Battery condition",       DiagnosticsFormatter.formatHealth(snapshot.health),                 snapshot.health != null,   "Sticky Intent (Android)")
+        
+        val (healthText, isHealthAvail, healthSource) = when (healthEstimate) {
+            is com.example.chargetrack.domain.health.BatteryHealthEstimate.Calculated ->
+                Triple("${healthEstimate.displayedHealthPercentage}%", true, "ChargeTrack (${healthEstimate.observationCount} full charges)")
+            is com.example.chargetrack.domain.health.BatteryHealthEstimate.InsufficientData ->
+                Triple("Not enough data", false, "ChargeTrack (${healthEstimate.observationCount}/${healthEstimate.requiredCount} full charges)")
+            is com.example.chargetrack.domain.health.BatteryHealthEstimate.Unavailable ->
+                Triple("Unavailable", false, "ChargeTrack")
+        }
+        PropertyRow("Estimated battery health", healthText, isHealthAvail, healthSource)
+        
+        PropertyRow("Capacity reference",      DiagnosticsFormatter.formatCapacityReference(referenceCapacityMah), referenceCapacityMah != null, "Device Profile")
+        PropertyRow("Percentage",              DiagnosticsFormatter.formatPercent(snapshot.percent),               snapshot.percent != null,  "Sticky Intent")
+        PropertyRow("Voltage",                 DiagnosticsFormatter.formatVoltage(snapshot.voltageMv),             snapshot.voltageMv != null, "Sticky Intent")
+        PropertyRow("Temperature",             DiagnosticsFormatter.formatTemperature(snapshot.temperatureDeciC), snapshot.temperatureDeciC != null, "Sticky Intent")
+        PropertyRow("Status",                  DiagnosticsFormatter.formatStatus(snapshot.batteryStatus),          snapshot.batteryStatus != null, "Sticky Intent")
+        PropertyRow("Plugged type",            DiagnosticsFormatter.formatPlugged(snapshot.pluggedType),           snapshot.pluggedType != null, "Sticky Intent")
+        PropertyRow("Cycle count",             DiagnosticsFormatter.formatCycleCount(snapshot.cycleCount),         snapshot.cycleCount != null, "Sticky Intent  (API 34+)")
     }
 }
 

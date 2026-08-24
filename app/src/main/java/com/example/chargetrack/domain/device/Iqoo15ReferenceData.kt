@@ -25,17 +25,19 @@ object Iqoo15ReferenceData {
     const val WIRELESS_REFERENCE_W: Int = 40
 
     /**
-     * Known [android.os.Build.BRAND] values for iQOO devices (lowercase).
+     * Known [android.os.Build.BRAND] and [android.os.Build.MANUFACTURER] values (lowercase).
      * Brand detection is case-insensitive.
      */
-    val KNOWN_BRANDS: Set<String> = setOf("iqoo")
+    val KNOWN_BRANDS: Set<String> = setOf("iqoo", "vivo")
 
     /**
-     * Known [android.os.Build.MODEL] strings for iQOO 15 variants (lowercase).
+     * Known [android.os.Build.MODEL], [android.os.Build.DEVICE], and [android.os.Build.PRODUCT]
+     * strings for iQOO 15 hardware variants (lowercase).
      *
-     * "iqoo 15" covers the display model name.
-     * Internal hardware codes (e.g. Vxxx codes) will be added after Prompt 05
-     * Diagnostics validation on the physical device.
+     * - "iqoo 15": Display/marketing model name
+     * - "i2501": Physical iQOO 15 (India / Global) Build.MODEL and Build.DEVICE
+     * - "i2501i": Physical iQOO 15 Build.PRODUCT / SKU
+     * - "pd2505": vivo / iQOO internal project code (PD2505CF...)
      */
-    val KNOWN_MODEL_NAMES: Set<String> = setOf("iqoo 15")
+    val KNOWN_MODEL_NAMES: Set<String> = setOf("iqoo 15", "i2501", "i2501i", "pd2505")
 }

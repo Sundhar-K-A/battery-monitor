@@ -38,18 +38,29 @@ object DeviceIdentifier {
     /**
      * Returns true if [buildInfo] matches the iQOO 15.
      *
-     * Match criteria (both must be true):
-     * 1. [BuildInfo.brand] is "iQOO" (case-insensitive).
-     * 2. [BuildInfo.model] (trimmed, lowercase) is in [Iqoo15ReferenceData.KNOWN_MODEL_NAMES].
-     *
-     * NOTE: Internal hardware model codes (Vxxx codes) will be added to
-     * [Iqoo15ReferenceData.KNOWN_MODEL_NAMES] after Prompt 05 Diagnostics validation
-     * on the physical iQOO 15.
+     * Match criteria:
+     * 1. [BuildInfo.brand] or [BuildInfo.manufacturer] is "iQOO" or "vivo" (case-insensitive).
+     * 2. [BuildInfo.model], [BuildInfo.device], [BuildInfo.product], or [BuildInfo.buildDisplay]
+     *    matches recognized iQOO 15 hardware identifiers ("iqoo 15", "i2501", "i2501i", "pd2505").
      */
     fun isIqoo15(buildInfo: BuildInfo): Boolean {
         val brand = buildInfo.brand.trim().lowercase()
+        val manufacturer = buildInfo.manufacturer.trim().lowercase()
+
+        val isBrandValid = brand in Iqoo15ReferenceData.KNOWN_BRANDS ||
+            (brand.isBlank() && manufacturer in Iqoo15ReferenceData.KNOWN_BRANDS)
+        val isManufacturerValid = manufacturer.isBlank() || manufacturer in Iqoo15ReferenceData.KNOWN_BRANDS
+
+        if (!isBrandValid || !isManufacturerValid) return false
+
         val model = buildInfo.model.trim().lowercase()
-        return brand in Iqoo15ReferenceData.KNOWN_BRANDS &&
-            model in Iqoo15ReferenceData.KNOWN_MODEL_NAMES
+        val device = buildInfo.device.trim().lowercase()
+        val product = buildInfo.product.trim().lowercase()
+        val display = buildInfo.buildDisplay.trim().lowercase()
+
+        return model in Iqoo15ReferenceData.KNOWN_MODEL_NAMES ||
+            device in Iqoo15ReferenceData.KNOWN_MODEL_NAMES ||
+            product in Iqoo15ReferenceData.KNOWN_MODEL_NAMES ||
+            display.contains("pd2505")
     }
 }

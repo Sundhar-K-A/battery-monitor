@@ -98,4 +98,14 @@ object DiagnosticsFormatter {
     fun formatPercent(raw: Int?): String = raw?.let { "$it %" } ?: "—"
 
     fun formatCycleCount(raw: Int?): String = raw?.toString() ?: "—"
+
+    fun formatEstimatedHealth(estimate: com.example.chargetrack.domain.health.BatteryHealthEstimate): String = when (estimate) {
+        is com.example.chargetrack.domain.health.BatteryHealthEstimate.Calculated -> "${estimate.displayedHealthPercentage}%"
+        is com.example.chargetrack.domain.health.BatteryHealthEstimate.InsufficientData -> "Not enough data"
+        is com.example.chargetrack.domain.health.BatteryHealthEstimate.Unavailable -> "Unavailable"
+    }
+
+    fun formatCapacityReference(typicalMah: Int?): String {
+        return typicalMah?.let { "$it mAh (typical reference)" } ?: "—"
+    }
 }
