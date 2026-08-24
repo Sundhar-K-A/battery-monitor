@@ -13,11 +13,17 @@ interface SoftwareSnapshotDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(snapshot: SoftwareSnapshotEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrReplace(snapshot: SoftwareSnapshotEntity): Long
+
     @Query("SELECT * FROM software_snapshots WHERE id = :id")
     suspend fun getById(id: String): SoftwareSnapshotEntity?
 
-    @Query("SELECT * FROM software_snapshots ORDER BY capturedAt DESC LIMIT 1")
-    suspend fun getLatest(): SoftwareSnapshotEntity?
+    @Query("SELECT * FROM software_snapshots ORDER BY capturedAt ASC")
+    fun getAllSnapshotsFlow(): Flow<List<SoftwareSnapshotEntity>>
+
+    @Query("SELECT * FROM software_snapshots ORDER BY capturedAt ASC")
+    suspend fun getAllSnapshots(): List<SoftwareSnapshotEntity>
 
     @Query("DELETE FROM software_snapshots WHERE id = :id")
     suspend fun delete(id: String)

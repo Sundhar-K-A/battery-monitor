@@ -109,4 +109,38 @@ class LongitudinalRepository @Inject constructor(
         database.standardTestDao().setBaselineForGroup(testId, comparisonGroupKey, Instant.now())
         return true
     }
+
+    /**
+     * Computes software and firmware version correlation analysis for a comparison group.
+     */
+    suspend fun getSoftwareCorrelationAnalysis(comparisonGroupKey: String): com.example.chargetrack.domain.correlation.SoftwareCorrelationAnalysis {
+        val testEntities = database.standardTestDao().getTestsForGroup(comparisonGroupKey)
+        val inputs = mutableListOf<com.example.chargetrack.domain.correlation.StandardTestWithSnapshotInput>()
+
+        for (testEntity in testEntities) {
+            val session = database.chargingSessionDao().getById(testEntity.sessionId) ?: continue
+
+            if (session.endReason == SessionEndReason.MEASUREMENT_LOST || session.endReason == SessionEndReason.DEVICE_RESTARTED) {
+                continue
+            }
+
+            val snapshotEntity = database.softwareSnapshotDao().getById(session.softwareSnapshotId) ?: continue
+            val sampleEntities = database.batterySampleDao().getSamplesForSessionOrdered(testEntity.sessionId)
+            val domainSamples = sampleEntities.map { it.toDomain() }
+
+            inputs.add(
+                com.example.chargetrack.domain.correlation.StandardTestWithSnapshotInput(
+                    test = testEntity.toDomain(),
+                    sessionStartedAt = session.startedAt,
+                    softwareSnapshot = snapshotEntity.toDomain(),
+                    samples = domainSamples,
+                )
+            )
+        }
+
+        return com.example.chargetrack.domain.correlation.SoftwareCorrelationCalculator.calculateCorrelationAnalysis(
+            groupKey = comparisonGroupKey,
+            inputs = inputs,
+        )
+    }
 }

@@ -175,16 +175,30 @@ fun DegradationScreen(
                                 )
                             },
                         )
+                        Tab(
+                            selected = selectedTabIndex == 2,
+                            onClick = { selectedTabIndex = 2 },
+                            text = {
+                                Text(
+                                    "Firmware Correlation",
+                                    color = if (selectedTabIndex == 2) Color(0xFF00E5FF) else SubtitleColor,
+                                    fontWeight = if (selectedTabIndex == 2) FontWeight.Bold else FontWeight.Normal,
+                                )
+                            },
+                        )
                     }
 
-                    if (selectedTabIndex == 0) {
-                        PerformanceTabContent(
+                    when (selectedTabIndex) {
+                        0 -> PerformanceTabContent(
                             state = state,
                             onSelectGroup = { viewModel.selectGroup(it) },
                             onOpenBaselineDialog = { showBaselineDialog = true },
                         )
-                    } else {
-                        CapacityTabContent(state = state)
+                        1 -> CapacityTabContent(state = state)
+                        2 -> SoftwareCorrelationTabContent(
+                            state = state,
+                            onSelectGroup = { viewModel.selectGroup(it) },
+                        )
                     }
                 }
 
@@ -272,6 +286,7 @@ private fun PerformanceTabContent(
                     unit = "minutes",
                     points = durationPoints,
                     seriesColor = AmberAccent,
+                    firmwareTransitionTimestamps = state.firmwareTransitionTimestamps,
                 )
             }
 
@@ -285,6 +300,7 @@ private fun PerformanceTabContent(
                     unit = "Watts",
                     points = powerPoints,
                     seriesColor = BlueAccent,
+                    firmwareTransitionTimestamps = state.firmwareTransitionTimestamps,
                 )
             }
 
@@ -300,6 +316,7 @@ private fun PerformanceTabContent(
                     unit = "°C",
                     points = tempPoints,
                     seriesColor = Color(0xFFEF5350),
+                    firmwareTransitionTimestamps = state.firmwareTransitionTimestamps,
                 )
             }
 
@@ -345,6 +362,7 @@ private fun CapacityTabContent(state: DegradationUiState.Ready) {
                     seriesColor = GreenColor,
                     referenceLineValue = analysis.referenceCapacityMah.toDouble(),
                     referenceLineLabel = "${analysis.referenceCapacityMah} mAh Ref",
+                    firmwareTransitionTimestamps = state.firmwareTransitionTimestamps,
                 )
             }
 
@@ -359,6 +377,62 @@ private fun CapacityTabContent(state: DegradationUiState.Ready) {
 
             items(analysis.points) { point ->
                 CapacityPointRow(point, analysis.referenceCapacityMah)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SoftwareCorrelationTabContent(
+    state: DegradationUiState.Ready,
+    onSelectGroup: (String) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        // Comparison Group Selector
+        if (state.availableGroups.size > 1) {
+            item {
+                Column {
+                    Text("Comparison Group", style = MaterialTheme.typography.labelSmall, color = SubtitleColor)
+                    Spacer(Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        state.availableGroups.forEach { groupKey ->
+                            val isSelected = groupKey == state.selectedGroupKey
+                            Surface(
+                                color = if (isSelected) Color(0xFF00E5FF).copy(alpha = 0.2f) else CardBackground,
+                                shape = RoundedCornerShape(8.dp),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp,
+                                    if (isSelected) Color(0xFF00E5FF) else CardBorder
+                                ),
+                                modifier = Modifier.clickable { onSelectGroup(groupKey) },
+                            ) {
+                                Text(
+                                    text = formatGroupKey(groupKey),
+                                    color = if (isSelected) Color(0xFF00E5FF) else SubtitleColor,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        val correlation = state.softwareCorrelation
+        if (correlation != null) {
+            item {
+                com.example.chargetrack.ui.degradation.components.SoftwareCorrelationCard(
+                    analysis = correlation,
+                )
             }
         }
     }

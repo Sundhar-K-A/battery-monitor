@@ -1,7 +1,9 @@
 package com.example.chargetrack.ui.degradation
 
+import com.example.chargetrack.domain.correlation.SoftwareCorrelationAnalysis
 import com.example.chargetrack.domain.degradation.CapacityDegradationAnalysis
 import com.example.chargetrack.domain.degradation.GroupTrendAnalysis
+import java.time.Instant
 
 /**
  * UI State for the Longitudinal Degradation Analysis screen.
@@ -15,6 +17,8 @@ sealed interface DegradationUiState {
         val selectedGroupKey: String?,
         val performanceTrend: GroupTrendAnalysis?,
         val capacityTrend: CapacityDegradationAnalysis,
+        val softwareCorrelation: SoftwareCorrelationAnalysis? = null,
+        val firmwareTransitionTimestamps: List<Instant> = emptyList(),
         val isSettingBaseline: Boolean = false,
     ) : DegradationUiState
 

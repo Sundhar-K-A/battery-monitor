@@ -33,6 +33,13 @@ class DegradationViewModel @Inject constructor(
                     longitudinalRepository.getGroupTrendAnalysis(it)
                 }
                 val capacityTrend = longitudinalRepository.getCapacityDegradationAnalysis()
+                val softwareCorrelation = targetGroup?.let {
+                    longitudinalRepository.getSoftwareCorrelationAnalysis(it)
+                }
+                val fwTimestamps = softwareCorrelation?.firmwareTransitions
+                    ?.filter { it.isFirmwareChanged }
+                    ?.map { it.timestamp }
+                    ?: emptyList()
 
                 if (groups.isEmpty() && capacityTrend.observationCount == 0) {
                     _uiState.value = DegradationUiState.Empty()
@@ -42,6 +49,8 @@ class DegradationViewModel @Inject constructor(
                         selectedGroupKey = targetGroup,
                         performanceTrend = performanceTrend,
                         capacityTrend = capacityTrend,
+                        softwareCorrelation = softwareCorrelation,
+                        firmwareTransitionTimestamps = fwTimestamps,
                     )
                 }
             }.onFailure { e ->

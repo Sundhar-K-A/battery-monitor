@@ -50,6 +50,7 @@ fun LongitudinalTrendChart(
     seriesColor: Color,
     referenceLineValue: Double? = null,
     referenceLineLabel: String? = null,
+    firmwareTransitionTimestamps: List<Instant> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -171,6 +172,31 @@ fun LongitudinalTrendChart(
                                 paddingLeft + 8f,
                                 refY - 6f,
                                 textPaint,
+                            )
+                        }
+                    }
+
+                    // 2.5 Firmware update transition vertical markers
+                    val fwMarkerPaint = android.graphics.Paint().apply {
+                        color = android.graphics.Color.parseColor("#00E5FF")
+                        textSize = 20f
+                        isAntiAlias = true
+                    }
+                    firmwareTransitionTimestamps.forEach { t ->
+                        val x = toX(t)
+                        if (x in paddingLeft..(paddingLeft + chartWidth)) {
+                            drawLine(
+                                color = Color(0xFF00E5FF).copy(alpha = 0.7f),
+                                start = Offset(x, paddingTop),
+                                end = Offset(x, paddingTop + chartHeight),
+                                strokeWidth = 1.5.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f),
+                            )
+                            drawContext.canvas.nativeCanvas.drawText(
+                                "FW Update",
+                                x + 4f,
+                                paddingTop + 18f,
+                                fwMarkerPaint,
                             )
                         }
                     }

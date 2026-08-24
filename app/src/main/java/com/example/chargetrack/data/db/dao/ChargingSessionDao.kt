@@ -17,6 +17,9 @@ interface ChargingSessionDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(session: ChargingSessionEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrReplace(session: ChargingSessionEntity): Long
+
     @Update
     suspend fun update(session: ChargingSessionEntity)
 
