@@ -35,8 +35,8 @@ interface ChargingSessionDao {
     @Query("SELECT * FROM charging_sessions ORDER BY startedAt DESC")
     fun getAllSessionsFlow(): Flow<List<ChargingSessionEntity>>
 
-    @Query("SELECT * FROM charging_sessions ORDER BY startedAt DESC LIMIT :limit")
-    fun getRecentSessionsFlow(limit: Int): Flow<List<ChargingSessionEntity>>
+    @Query("SELECT * FROM charging_sessions WHERE endPercent = 100 ORDER BY startedAt DESC")
+    suspend fun getSessionsReachedFull(): List<ChargingSessionEntity>
 
     @Query("UPDATE charging_sessions SET endedAt = :endedAt, endPercent = :endPercent, endReason = :endReason WHERE id = :sessionId")
     suspend fun updateSessionEnd(sessionId: String, endedAt: Instant, endPercent: Int?, endReason: SessionEndReason)

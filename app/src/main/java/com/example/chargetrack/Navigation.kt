@@ -27,6 +27,7 @@ fun MainNavigation() {
                     onNavigateToLiveSession = { backStack.add(LiveSession) },
                     onNavigateToStandardTest = { backStack.add(StandardTestConfig) },
                     onNavigateToHistory = { backStack.add(History) },
+                    onNavigateToComparison = { backStack.add(StandardTestComparisonNav()) },
                     modifier = Modifier.safeDrawingPadding().padding(16.dp),
                 )
             }
@@ -61,11 +62,19 @@ fun MainNavigation() {
                     sessionId = key.sessionId,
                     onNavigateBack = { backStack.removeLastOrNull() },
                     onNavigateToCharts = { sessionId -> backStack.add(SessionCharts(sessionId)) },
+                    onNavigateToComparison = { sessionId -> backStack.add(StandardTestComparisonNav(primarySessionId = sessionId)) },
                 )
             }
             entry<SessionCharts> { key ->
                 com.example.chargetrack.ui.charts.SessionChartsScreen(
                     sessionId = key.sessionId,
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                )
+            }
+            entry<StandardTestComparisonNav> { key ->
+                com.example.chargetrack.ui.comparison.StandardTestComparisonScreen(
+                    primarySessionId = key.primarySessionId,
+                    candidateSessionId = key.candidateSessionId,
                     onNavigateBack = { backStack.removeLastOrNull() },
                 )
             }

@@ -25,5 +25,5 @@ data class StandardTestConfigUiState(
     val errorMessage: String? = null,
 ) {
     val canStart: Boolean
-        get() = isCharging && selectedSetup != null && !isStarting
+        get() = isCharging && selectedSetup != null && isBatteryReady && !isStarting
 }

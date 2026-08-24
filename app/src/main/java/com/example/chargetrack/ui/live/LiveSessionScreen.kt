@@ -77,7 +77,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 
 // Design tokens
-private val DarkBackground = Color(0xFF0D0F14)
+private val DarkBackground = Color(0xFF000000)
 private val CardSurface = Color(0xFF161B24)
 private val CardBorder = Color(0xFF2A3241)
 private val AmberAccent = Color(0xFFFFB300)

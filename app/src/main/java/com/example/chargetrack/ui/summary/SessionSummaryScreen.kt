@@ -59,7 +59,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val ScreenBackground = Color(0xFF0D0F14)
+private val ScreenBackground = Color(0xFF000000)
 private val CardBackground = Color(0xFF161B24)
 private val CardBorder = Color(0xFF2A3241)
 private val AmberAccent = Color(0xFFFFB300)
@@ -75,6 +75,7 @@ fun SessionSummaryScreen(
     sessionId: String,
     onNavigateBack: () -> Unit,
     onNavigateToCharts: (String) -> Unit,
+    onNavigateToComparison: (String) -> Unit = {},
     viewModel: SessionSummaryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -82,6 +83,9 @@ fun SessionSummaryScreen(
     LaunchedEffect(sessionId) {
         viewModel.loadSessionSummary(sessionId)
     }
+
+    val success = uiState as? SessionSummaryUiState.Success
+    val isStandardTest = success?.session?.testType == TestType.STANDARD
 
     Scaffold(
         topBar = {
@@ -99,6 +103,11 @@ fun SessionSummaryScreen(
                     }
                 },
                 actions = {
+                    if (isStandardTest) {
+                        IconButton(onClick = { onNavigateToComparison(sessionId) }) {
+                            Icon(Icons.Filled.Speed, contentDescription = "Compare test", tint = AmberAccent)
+                        }
+                    }
                     IconButton(onClick = { onNavigateToCharts(sessionId) }) {
                         Icon(Icons.Filled.Bolt, contentDescription = "Open charts", tint = AmberAccent)
                     }
@@ -117,20 +126,42 @@ fun SessionSummaryScreen(
                     .fillMaxWidth()
                     .padding(16.dp),
             ) {
-                Button(
-                    onClick = { onNavigateToCharts(sessionId) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = AmberAccent,
-                        contentColor = Color.Black,
-                    ),
-                    shape = RoundedCornerShape(12.dp),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Icon(Icons.Filled.Bolt, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Open Interactive Charts", fontWeight = FontWeight.Bold)
+                    if (isStandardTest) {
+                        Button(
+                            onClick = { onNavigateToComparison(sessionId) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF29B6F6),
+                                contentColor = Color.Black,
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            Icon(Icons.Filled.Speed, contentDescription = null)
+                            Spacer(Modifier.width(6.dp))
+                            Text("Compare", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    Button(
+                        onClick = { onNavigateToCharts(sessionId) },
+                        modifier = Modifier
+                            .weight(if (isStandardTest) 1.5f else 1f)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AmberAccent,
+                            contentColor = Color.Black,
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Icon(Icons.Filled.Bolt, contentDescription = null)
+                        Spacer(Modifier.width(6.dp))
+                        Text("Charts", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         },

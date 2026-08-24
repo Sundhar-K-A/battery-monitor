@@ -250,7 +250,7 @@ fun InteractiveLineChart(
                 val px = toCanvasX(peak.x)
                 val py = toCanvasY(peak.y)
                 drawCircle(color = Color(0xFFFFD54F), radius = 5.dp.toPx(), center = Offset(px, py))
-                drawCircle(color = Color(0xFF0D0F14), radius = 2.5.dp.toPx(), center = Offset(px, py))
+                drawCircle(color = Color(0xFF000000), radius = 2.5.dp.toPx(), center = Offset(px, py))
             }
 
             series.taperPoint?.let { taper ->

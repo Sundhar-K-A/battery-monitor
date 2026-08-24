@@ -10,3 +10,4 @@ import kotlinx.serialization.Serializable
 @Serializable data object History            : NavKey
 @Serializable data class SessionCharts(val sessionId: String) : NavKey
 @Serializable data class SessionSummaryDetail(val sessionId: String) : NavKey
+@Serializable data class StandardTestComparisonNav(val primarySessionId: String? = null, val candidateSessionId: String? = null) : NavKey

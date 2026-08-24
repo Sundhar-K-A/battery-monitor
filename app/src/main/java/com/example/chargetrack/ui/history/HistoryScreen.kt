@@ -51,7 +51,7 @@ import com.example.chargetrack.domain.history.HistorySortOption
 import com.example.chargetrack.ui.history.components.HistoryFilterChips
 import com.example.chargetrack.ui.history.components.HistorySessionCard
 
-private val ScreenBackground = Color(0xFF0D0F14)
+private val ScreenBackground = Color(0xFF000000)
 private val AmberAccent = Color(0xFFFFB300)
 private val SubtitleColor = Color(0xFF8C9BAE)
 private val RedWarning = Color(0xFFEF5350)

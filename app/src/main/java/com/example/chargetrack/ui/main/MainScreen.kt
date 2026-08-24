@@ -25,19 +25,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.chargetrack.theme.ChargeTrackTheme
 
+import androidx.compose.material3.Surface
+
 @Composable
 fun MainScreen(
     onNavigateToDiagnostics: () -> Unit,
     onNavigateToLiveSession: () -> Unit,
     onNavigateToStandardTest: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
+    onNavigateToComparison: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+    Surface(
+        color = Color(0xFF000000),
+        modifier = Modifier.fillMaxSize(),
     ) {
+        Column(
+            modifier = modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
         Icon(
             imageVector = Icons.Filled.BatteryChargingFull,
             contentDescription = null,
@@ -74,6 +81,12 @@ fun MainScreen(
             Text("Live Session")
         }
         Spacer(Modifier.height(12.dp))
+        FilledTonalButton(onClick = onNavigateToComparison) {
+            Icon(Icons.Filled.Speed, contentDescription = null)
+            Spacer(Modifier.padding(horizontal = 4.dp))
+            Text("Compare Standard Tests")
+        }
+        Spacer(Modifier.height(12.dp))
         FilledTonalButton(onClick = onNavigateToHistory) {
             Icon(Icons.Filled.Speed, contentDescription = null)
             Spacer(Modifier.padding(horizontal = 4.dp))
@@ -87,6 +100,7 @@ fun MainScreen(
         }
     }
 }
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -97,6 +111,7 @@ fun MainScreenPreview() {
             onNavigateToLiveSession = {},
             onNavigateToStandardTest = {},
             onNavigateToHistory = {},
+            onNavigateToComparison = {},
         )
     }
 }

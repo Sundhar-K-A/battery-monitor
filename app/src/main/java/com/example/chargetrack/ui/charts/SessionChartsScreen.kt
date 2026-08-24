@@ -45,7 +45,7 @@ import com.example.chargetrack.ui.charts.components.InteractiveLineChart
 import com.example.chargetrack.ui.charts.components.TimePerPercentBarChart
 import java.util.Locale
 
-private val ScreenBackground = Color(0xFF0D0F14)
+private val ScreenBackground = Color(0xFF000000)
 private val TabSelectedColor = Color(0xFFFFB300)
 private val TabUnselectedColor = Color(0xFF8C9BAE)
 

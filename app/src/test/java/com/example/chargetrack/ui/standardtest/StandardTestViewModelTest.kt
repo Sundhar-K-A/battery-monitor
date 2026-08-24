@@ -199,6 +199,31 @@ class StandardTestViewModelTest {
         assertTrue("Foreground service should be started", fakeServiceController.isServiceRunning)
     }
 
+    @Test
+    fun `06 - canStart is false when battery is above target start percentage`() = testScope.runTest {
+        viewModel = createViewModel()
+        testScheduler.runCurrent()
+
+        // Battery is 62%, target is 20%
+        fakeBatteryDataSource.emitSnapshot(
+            BatterySnapshot(
+                timestamp = Instant.now(),
+                percent = 62,
+                voltageMv = 4200,
+                currentNowUa = 10_000_000,
+                temperatureDeciC = 310,
+                batteryStatus = BatteryManager.BATTERY_STATUS_CHARGING,
+                pluggedType = BatteryManager.BATTERY_PLUGGED_AC,
+            )
+        )
+        viewModel.refreshBatteryStatus()
+        testScheduler.runCurrent()
+
+        val state = viewModel.uiState.value
+        assertFalse("canStart must be false when battery is 62% for a 20% target start", state.canStart)
+        assertFalse(state.isBatteryReady)
+    }
+
     private class FakeBatteryDataSource : BatteryDataSource {
         var currentSnapshot: BatterySnapshot = BatterySnapshot(
             timestamp = Instant.now(),

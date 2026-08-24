@@ -60,7 +60,7 @@ import com.example.chargetrack.domain.enums.ChargingMode
 import com.example.chargetrack.domain.model.StandardTestConstants
 import com.example.chargetrack.domain.model.StandardTestPreset
 
-private val ScreenBackground = Color(0xFF0D0F14)
+private val ScreenBackground = Color(0xFF000000)
 private val CardBackground = Color(0xFF161B24)
 private val CardBorderColor = Color(0xFF2A3241)
 private val AmberAccent = Color(0xFFFFB300)
@@ -303,23 +303,73 @@ fun StandardTestConfigScreen(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                     )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(top = 4.dp),
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
                     ) {
-                        ChargingMode.entries.forEach { mode ->
-                            val isModeSelected = uiState.selectedChargingMode == mode
-                            FilterChip(
-                                selected = isModeSelected,
-                                onClick = { viewModel.setChargingMode(mode) },
-                                label = { Text(mode.name.replace("_", " "), fontSize = 11.sp) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = ScreenBackground,
-                                    labelColor = Color(0xFF8C9BAE),
-                                    selectedContainerColor = AmberAccent.copy(alpha = 0.2f),
-                                    selectedLabelColor = AmberAccent,
-                                ),
-                            )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            listOf(ChargingMode.NORMAL, ChargingMode.FLASH_CHARGE).forEach { mode ->
+                                val isModeSelected = uiState.selectedChargingMode == mode
+                                FilterChip(
+                                    selected = isModeSelected,
+                                    onClick = { viewModel.setChargingMode(mode) },
+                                    label = {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Text(
+                                                text = mode.name.replace("_", " "),
+                                                fontSize = 11.sp,
+                                                maxLines = 1,
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        containerColor = ScreenBackground,
+                                        labelColor = Color(0xFF8C9BAE),
+                                        selectedContainerColor = AmberAccent.copy(alpha = 0.2f),
+                                        selectedLabelColor = AmberAccent,
+                                    ),
+                                )
+                            }
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            listOf(ChargingMode.BYPASS, ChargingMode.OTHER).forEach { mode ->
+                                val isModeSelected = uiState.selectedChargingMode == mode
+                                FilterChip(
+                                    selected = isModeSelected,
+                                    onClick = { viewModel.setChargingMode(mode) },
+                                    label = {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Text(
+                                                text = mode.name.replace("_", " "),
+                                                fontSize = 11.sp,
+                                                maxLines = 1,
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        containerColor = ScreenBackground,
+                                        labelColor = Color(0xFF8C9BAE),
+                                        selectedContainerColor = AmberAccent.copy(alpha = 0.2f),
+                                        selectedLabelColor = AmberAccent,
+                                    ),
+                                )
+                            }
                         }
                     }
                 }
@@ -454,6 +504,24 @@ fun StandardTestConfigScreen(
             }
 
             // 9. Begin Standard Test Button
+            val snapshot = uiState.latestSnapshot
+            val currPercent = snapshot?.percent
+            val buttonText = when {
+                uiState.isStarting -> "Starting..."
+                !uiState.isCharging -> "Connect Charger to Begin"
+                !uiState.isBatteryReady -> {
+                    if (currPercent != null && currPercent > uiState.startPercent) {
+                        "Discharge to ${uiState.startPercent}% Before Starting"
+                    } else {
+                        "Battery Not Ready for ${uiState.startPercent}% Benchmark"
+                    }
+                }
+                currPercent != null && currPercent < uiState.startPercent ->
+                    "Arm Standard Test (${uiState.startPercent}% → ${uiState.targetPercent}%)"
+                else ->
+                    "Begin Standard Test (${uiState.startPercent}% → ${uiState.targetPercent}%)"
+            }
+
             Button(
                 onClick = { viewModel.startStandardTest(onNavigateToLiveSession) },
                 enabled = uiState.canStart,
@@ -471,7 +539,7 @@ fun StandardTestConfigScreen(
                 Icon(Icons.Default.BatteryChargingFull, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    if (uiState.isStarting) "Starting..." else "Begin Standard Test (${uiState.startPercent}% → ${uiState.targetPercent}%)",
+                    text = buttonText,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                 )
