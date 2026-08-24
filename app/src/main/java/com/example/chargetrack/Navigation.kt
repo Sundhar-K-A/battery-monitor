@@ -28,6 +28,7 @@ fun MainNavigation() {
                     onNavigateToStandardTest = { backStack.add(StandardTestConfig) },
                     onNavigateToHistory = { backStack.add(History) },
                     onNavigateToComparison = { backStack.add(StandardTestComparisonNav()) },
+                    onNavigateToDegradation = { backStack.add(DegradationAnalysisNav()) },
                     modifier = Modifier.safeDrawingPadding().padding(16.dp),
                 )
             }
@@ -75,6 +76,13 @@ fun MainNavigation() {
                 com.example.chargetrack.ui.comparison.StandardTestComparisonScreen(
                     primarySessionId = key.primarySessionId,
                     candidateSessionId = key.candidateSessionId,
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                )
+            }
+            entry<DegradationAnalysisNav> {
+                val viewModel: com.example.chargetrack.ui.degradation.DegradationViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+                com.example.chargetrack.ui.degradation.DegradationScreen(
+                    viewModel = viewModel,
                     onNavigateBack = { backStack.removeLastOrNull() },
                 )
             }

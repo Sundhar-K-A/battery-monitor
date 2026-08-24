@@ -31,6 +31,15 @@ interface StandardTestDao {
     @Query("SELECT * FROM standard_tests WHERE isBaseline = 1")
     fun getBaselineTestsFlow(): Flow<List<StandardTestEntity>>
 
+    @Query("SELECT * FROM standard_tests WHERE comparisonGroupKey = :comparisonGroupKey ORDER BY rowid ASC")
+    suspend fun getTestsForGroup(comparisonGroupKey: String): List<StandardTestEntity>
+
+    @Query("SELECT DISTINCT comparisonGroupKey FROM standard_tests WHERE benchmarkEndedElapsedMs IS NOT NULL")
+    fun getDistinctComparisonGroupKeysFlow(): Flow<List<String>>
+
+    @Query("SELECT DISTINCT comparisonGroupKey FROM standard_tests WHERE benchmarkEndedElapsedMs IS NOT NULL")
+    suspend fun getDistinctComparisonGroupKeys(): List<String>
+
     @Query("SELECT * FROM standard_tests WHERE comparisonGroupKey = :comparisonGroupKey AND isBaseline = 1 LIMIT 1")
     suspend fun getBaselineForGroup(comparisonGroupKey: String): StandardTestEntity?
 

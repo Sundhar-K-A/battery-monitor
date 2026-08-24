@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Speed
@@ -34,6 +35,7 @@ fun MainScreen(
     onNavigateToStandardTest: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
     onNavigateToComparison: () -> Unit = {},
+    onNavigateToDegradation: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -85,6 +87,12 @@ fun MainScreen(
             Icon(Icons.Filled.Speed, contentDescription = null)
             Spacer(Modifier.padding(horizontal = 4.dp))
             Text("Compare Standard Tests")
+        }
+        Spacer(Modifier.height(12.dp))
+        FilledTonalButton(onClick = onNavigateToDegradation) {
+            Icon(Icons.AutoMirrored.Filled.TrendingUp, contentDescription = null)
+            Spacer(Modifier.padding(horizontal = 4.dp))
+            Text("Degradation Analysis")
         }
         Spacer(Modifier.height(12.dp))
         FilledTonalButton(onClick = onNavigateToHistory) {
