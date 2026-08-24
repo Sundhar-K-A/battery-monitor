@@ -15,10 +15,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+import com.example.chargetrack.data.export.ExportImportRepository
+import com.example.chargetrack.domain.export.ExportFormat
+import java.io.OutputStream
+
 @HiltViewModel
 class SessionSummaryViewModel @Inject constructor(
     private val database: AppDatabase,
     private val sessionSummaryRepository: SessionSummaryRepository,
+    private val exportImportRepository: ExportImportRepository,
 ) : ViewModel() {
 
     internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -26,8 +31,9 @@ class SessionSummaryViewModel @Inject constructor(
     constructor(
         database: AppDatabase,
         sessionSummaryRepository: SessionSummaryRepository,
+        exportImportRepository: ExportImportRepository,
         ioDispatcher: CoroutineDispatcher,
-    ) : this(database, sessionSummaryRepository) {
+    ) : this(database, sessionSummaryRepository, exportImportRepository) {
         this.ioDispatcher = ioDispatcher
     }
 
@@ -61,6 +67,24 @@ class SessionSummaryViewModel @Inject constructor(
                 _uiState.value = state
             } catch (e: Exception) {
                 _uiState.value = SessionSummaryUiState.Error("Error loading session summary: ${e.message}")
+            }
+        }
+    }
+
+    fun exportSessionToStream(
+        sessionId: String,
+        format: ExportFormat,
+        outputStream: OutputStream,
+        onComplete: (Boolean, String?) -> Unit,
+    ) {
+        viewModelScope.launch {
+            try {
+                withContext(ioDispatcher) {
+                    exportImportRepository.exportSession(sessionId, format, outputStream)
+                }
+                onComplete(true, null)
+            } catch (e: Exception) {
+                onComplete(false, e.message)
             }
         }
     }

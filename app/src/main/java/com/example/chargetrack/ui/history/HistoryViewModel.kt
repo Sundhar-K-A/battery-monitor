@@ -22,23 +22,43 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.example.chargetrack.data.export.ExportImportRepository
+import com.example.chargetrack.domain.export.DuplicateStrategy
+import com.example.chargetrack.domain.export.ExportPayload
+import com.example.chargetrack.domain.export.ImportResult
+import java.io.InputStream
+
+import kotlinx.coroutines.withContext
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val historyRepository: HistoryRepository,
+    private val exportImportRepository: ExportImportRepository,
 ) : ViewModel() {
 
     internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
     constructor(
         historyRepository: HistoryRepository,
+        exportImportRepository: ExportImportRepository,
         ioDispatcher: CoroutineDispatcher,
-    ) : this(historyRepository) {
+    ) : this(historyRepository, exportImportRepository) {
         this.ioDispatcher = ioDispatcher
     }
 
     private val _filter = MutableStateFlow(HistoryFilter())
     private val _pendingDeleteId = MutableStateFlow<String?>(null)
+    private val _pendingDuplicatePayload = MutableStateFlow<ExportPayload?>(null)
+    private val _importStatusMessage = MutableStateFlow<String?>(null)
+
+    private val _dialogAndStatusFlow = combine(
+        _pendingDeleteId,
+        _pendingDuplicatePayload,
+        _importStatusMessage,
+    ) { deleteId, duplicatePayload, importMsg ->
+        Triple(deleteId, duplicatePayload, importMsg)
+    }
 
     val uiState: StateFlow<HistoryUiState> = combine(
         _filter.flatMapLatest { filter ->
@@ -46,8 +66,8 @@ class HistoryViewModel @Inject constructor(
         },
         historyRepository.getAvailableSetupsFlow(),
         _filter,
-        _pendingDeleteId,
-    ) { sessions, setups, filter, deleteId ->
+        _dialogAndStatusFlow,
+    ) { sessions, setups, filter, (deleteId, duplicatePayload, importMsg) ->
         HistoryUiState(
             filter = filter,
             sessions = sessions,
@@ -55,6 +75,8 @@ class HistoryViewModel @Inject constructor(
             isLoading = false,
             isDeleteConfirmDialogOpen = deleteId != null,
             pendingDeleteSessionId = deleteId,
+            pendingDuplicatePayload = duplicatePayload,
+            importStatusMessage = importMsg,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -108,5 +130,64 @@ class HistoryViewModel @Inject constructor(
             historyRepository.deleteSession(sessionId)
             _pendingDeleteId.value = null
         }
+    }
+
+    fun importSessionFromStream(inputStream: InputStream) {
+        viewModelScope.launch {
+            val result = withContext(ioDispatcher) {
+                exportImportRepository.importSession(inputStream, DuplicateStrategy.REJECT)
+            }
+            when (result) {
+                is ImportResult.Success -> {
+                    _importStatusMessage.value = "Imported session successfully (${result.sampleCount} samples)."
+                }
+                is ImportResult.Duplicate -> {
+                    _pendingDuplicatePayload.value = result.payload
+                }
+                is ImportResult.Error -> {
+                    _importStatusMessage.value = "Import failed: ${result.message}"
+                }
+            }
+        }
+    }
+
+    fun resolveDuplicateImport(strategy: DuplicateStrategy) {
+        val payload = _pendingDuplicatePayload.value ?: return
+        _pendingDuplicatePayload.value = null
+        viewModelScope.launch {
+            val prepared = com.example.chargetrack.domain.export.SessionImportEngine.prepareEntities(payload, strategy)
+            val result = withContext(ioDispatcher) {
+                // Re-export and import or direct repository import
+                val bundle = com.example.chargetrack.domain.export.FullSessionBundle(
+                    session = prepared.session,
+                    setup = prepared.setup,
+                    softwareSnapshot = prepared.softwareSnapshot,
+                    deviceProfile = prepared.deviceProfile,
+                    standardTest = prepared.standardTest,
+                    samples = prepared.samples,
+                    transitions = prepared.transitions,
+                )
+                val json = com.example.chargetrack.domain.export.SessionExportEngine.generateJson(bundle, null)
+                val stream = json.byteInputStream(java.nio.charset.StandardCharsets.UTF_8)
+                exportImportRepository.importSession(stream, strategy)
+            }
+            when (result) {
+                is ImportResult.Success -> {
+                    _importStatusMessage.value = "Imported session successfully as copy / overwrite (${result.sampleCount} samples)."
+                }
+                is ImportResult.Error -> {
+                    _importStatusMessage.value = "Import resolution failed: ${result.message}"
+                }
+                is ImportResult.Duplicate -> {}
+            }
+        }
+    }
+
+    fun dismissDuplicateDialog() {
+        _pendingDuplicatePayload.value = null
+    }
+
+    fun clearImportStatusMessage() {
+        _importStatusMessage.value = null
     }
 }

@@ -23,6 +23,9 @@ data class HistorySessionItem(
     val endReason: SessionEndReason?,
     val standardTest: StandardTest?,
     val isStandardTestComplete: Boolean?,
+    val softwareSnapshot: com.example.chargetrack.domain.model.SoftwareSnapshot? = null,
+    val isFirmwareUpdateSession: Boolean = false,
+    val isAppUpdateSession: Boolean = false,
 ) {
     val percentGained: Int?
         get() = if (endPercent != null) endPercent - startPercent else null

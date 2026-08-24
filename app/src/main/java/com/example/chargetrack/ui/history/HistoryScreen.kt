@@ -14,9 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.HistoryToggleOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -30,14 +33,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,21 +74,45 @@ fun HistoryScreen(
     val uiState by viewModel.uiState.collectAsState()
     var isSortMenuOpen by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            if (inputStream != null) {
+                viewModel.importSessionFromStream(inputStream)
+            }
+        }
+    }
+
+    LaunchedEffect(uiState.importStatusMessage) {
+        uiState.importStatusMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.clearImportStatusMessage()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
                     Column {
                         Text(
-                            "Charging History",
+                            text = "Charging History",
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
                         )
-                        Text(
-                            "${uiState.totalCount} session${if (uiState.totalCount == 1) "" else "s"}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = SubtitleColor,
-                        )
+                        if (!uiState.isLoading) {
+                            Text(
+                                text = "${uiState.totalCount} session${if (uiState.totalCount != 1) "s" else ""}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = SubtitleColor,
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
@@ -90,6 +121,9 @@ fun HistoryScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { importLauncher.launch(arrayOf("application/json", "text/*")) }) {
+                        Icon(Icons.Filled.FileDownload, contentDescription = "Import session JSON", tint = Color.White)
+                    }
                     IconButton(onClick = { isSortMenuOpen = true }) {
                         Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort sessions")
                     }
@@ -211,6 +245,61 @@ fun HistoryScreen(
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                     ) {
                         Text("Cancel")
+                    }
+                },
+                containerColor = DialogBackground,
+            )
+        }
+
+        // Duplicate Session Resolution Dialog
+        uiState.pendingDuplicatePayload?.let { payload ->
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissDuplicateDialog() },
+                title = {
+                    Text("Duplicate Session Detected", fontWeight = FontWeight.Bold, color = Color.White)
+                },
+                text = {
+                    Column {
+                        Text(
+                            "A session with ID '${payload.session.id.take(8)}...' already exists in your local history.",
+                            color = SubtitleColor,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            "How would you like to handle this imported session?",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+                },
+                confirmButton = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Button(
+                            onClick = { viewModel.resolveDuplicateImport(com.example.chargetrack.domain.export.DuplicateStrategy.ASSIGN_NEW_ID) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = AmberAccent, contentColor = Color.Black),
+                        ) {
+                            Text("Import as Copy (New ID)", fontWeight = FontWeight.Bold)
+                        }
+                        Button(
+                            onClick = { viewModel.resolveDuplicateImport(com.example.chargetrack.domain.export.DuplicateStrategy.OVERWRITE) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = RedWarning, contentColor = Color.White),
+                        ) {
+                            Text("Overwrite Existing Record", fontWeight = FontWeight.Bold)
+                        }
+                        OutlinedButton(
+                            onClick = { viewModel.dismissDuplicateDialog() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        ) {
+                            Text("Cancel / Skip")
+                        }
                     }
                 },
                 containerColor = DialogBackground,

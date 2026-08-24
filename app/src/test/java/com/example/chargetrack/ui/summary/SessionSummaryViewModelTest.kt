@@ -60,7 +60,8 @@ class SessionSummaryViewModelTest {
             .build()
 
         sessionSummaryRepository = SessionSummaryRepository(database)
-        viewModel = SessionSummaryViewModel(database, sessionSummaryRepository, testDispatcher)
+        val exportImportRepository = com.example.chargetrack.data.export.ExportImportRepository(database)
+        viewModel = SessionSummaryViewModel(database, sessionSummaryRepository, exportImportRepository, testDispatcher)
     }
 
     @After

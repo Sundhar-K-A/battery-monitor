@@ -35,15 +35,23 @@ class HistoryRepository @Inject constructor(
         val sessionsFlow = database.chargingSessionDao().getAllSessionsFlow()
         val setupsFlow = database.chargingSetupDao().getAllSetupsFlow()
         val standardTestsFlow = database.standardTestDao().getAllStandardTestsFlow()
+        val snapshotsFlow = database.softwareSnapshotDao().getAllSnapshotsFlow()
 
-        return combine(sessionsFlow, setupsFlow, standardTestsFlow) { sessions, setups, standardTests ->
+        return combine(sessionsFlow, setupsFlow, standardTestsFlow, snapshotsFlow) { sessions, setups, standardTests, snapshots ->
             val setupMap = setups.associate { it.id to it.toDomain() }
             val standardTestMap = standardTests.associateBy { it.sessionId }
+            val snapshotMap = snapshots.associate { it.id to it.toDomain() }
 
-            val items = sessions.map { sessionEntity ->
+            // Sort chronologically ascending to evaluate chronological firmware/app transitions
+            val chronologicalSessions = sessions.sortedBy { it.startedAt }
+            var prevFwKey: String? = null
+            var prevAppKey: String? = null
+
+            val items = chronologicalSessions.map { sessionEntity ->
                 val setup = setupMap[sessionEntity.chargingSetupId]
                 val stdEntity = standardTestMap[sessionEntity.id]
                 val stdDomain = stdEntity?.toDomain()
+                val software = snapshotMap[sessionEntity.softwareSnapshotId]
 
                 val isComplete = if (sessionEntity.testType == TestType.STANDARD && stdEntity != null && sessionEntity.endPercent != null) {
                     sessionEntity.endPercent >= stdEntity.targetEndPercent
@@ -52,6 +60,24 @@ class HistoryRepository @Inject constructor(
                 val durationMs = if (sessionEntity.endedAt != null) {
                     java.time.Duration.between(sessionEntity.startedAt, sessionEntity.endedAt).toMillis()
                 } else null
+
+                var isFwUpdate = false
+                var isAppUpdate = false
+
+                if (software != null) {
+                    val currFwKey = com.example.chargetrack.domain.correlation.SoftwareIdentityUtils.computeFirmwareKey(software)
+                    val currAppKey = com.example.chargetrack.domain.correlation.SoftwareIdentityUtils.computeAppKey(software)
+
+                    if (prevFwKey != null && prevFwKey != currFwKey) {
+                        isFwUpdate = true
+                    }
+                    if (prevAppKey != null && prevAppKey != currAppKey) {
+                        isAppUpdate = true
+                    }
+
+                    prevFwKey = currFwKey
+                    prevAppKey = currAppKey
+                }
 
                 HistorySessionItem(
                     sessionId = sessionEntity.id,
@@ -65,6 +91,9 @@ class HistoryRepository @Inject constructor(
                     endReason = sessionEntity.endReason,
                     standardTest = stdDomain,
                     isStandardTestComplete = isComplete,
+                    softwareSnapshot = software,
+                    isFirmwareUpdateSession = isFwUpdate,
+                    isAppUpdateSession = isAppUpdate,
                 )
             }
 

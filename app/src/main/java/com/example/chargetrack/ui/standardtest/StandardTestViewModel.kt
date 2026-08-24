@@ -37,6 +37,7 @@ class StandardTestViewModel @Inject constructor(
     private val batteryDataSource: BatteryDataSource,
     private val database: AppDatabase,
     private val measurementServiceController: MeasurementServiceController,
+    private val softwareSnapshotProvider: com.example.chargetrack.domain.system.SoftwareSnapshotProvider = com.example.chargetrack.data.system.DefaultSoftwareSnapshotProvider(),
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StandardTestConfigUiState())
@@ -186,7 +187,7 @@ class StandardTestViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val swSnapshot = captureSoftwareSnapshot()
+                val swSnapshot = softwareSnapshotProvider.captureCurrentSnapshot()
                 val result = sessionRepository.startSession(
                     snapshot = snapshot,
                     setup = setup,
@@ -257,16 +258,5 @@ class StandardTestViewModel @Inject constructor(
         chargerBrand = setup.chargerBrand,
         advertisedWattageW = setup.advertisedWattageW,
         chargingMode = mode,
-    )
-
-    private fun captureSoftwareSnapshot(): SoftwareSnapshot = SoftwareSnapshot(
-        id = UUID.randomUUID().toString(),
-        capturedAt = Instant.now(),
-        androidVersion = Build.VERSION.RELEASE ?: "Unknown",
-        sdkInt = Build.VERSION.SDK_INT,
-        originOsVersion = Build.DISPLAY,
-        buildFingerprint = Build.FINGERPRINT ?: "Unknown",
-        appVersionName = BuildConfig.VERSION_NAME,
-        appVersionCode = BuildConfig.VERSION_CODE,
     )
 }

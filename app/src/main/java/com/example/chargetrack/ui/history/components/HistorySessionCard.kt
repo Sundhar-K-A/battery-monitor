@@ -144,6 +144,55 @@ fun HistorySessionCard(
                 }
             }
 
+            // Software / Firmware Update Badges
+            if (item.isFirmwareUpdateSession || item.isAppUpdateSession) {
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    if (item.isFirmwareUpdateSession) {
+                        val fwLabel = item.softwareSnapshot?.let {
+                            com.example.chargetrack.domain.correlation.SoftwareIdentityUtils.formatFirmwareDisplayLabel(it)
+                        } ?: "Firmware Updated"
+
+                        Surface(
+                            color = Color(0xFF00E5FF).copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(4.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.4f)),
+                        ) {
+                            Text(
+                                text = "Firmware Updated ($fwLabel)",
+                                color = Color(0xFF00E5FF),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            )
+                        }
+                    }
+
+                    if (item.isAppUpdateSession) {
+                        val appLabel = item.softwareSnapshot?.let {
+                            com.example.chargetrack.domain.correlation.SoftwareIdentityUtils.computeAppKey(it)
+                        } ?: "App Updated"
+
+                        Surface(
+                            color = Color(0xFFBA68C8).copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(4.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFBA68C8).copy(alpha = 0.4f)),
+                        ) {
+                            Text(
+                                text = "App Updated ($appLabel)",
+                                color = Color(0xFFBA68C8),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            )
+                        }
+                    }
+                }
+            }
+
             Spacer(Modifier.height(12.dp))
 
             // 2. Battery Percentage & Duration Row

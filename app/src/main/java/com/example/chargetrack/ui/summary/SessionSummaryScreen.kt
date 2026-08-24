@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
@@ -43,6 +44,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -87,7 +91,47 @@ fun SessionSummaryScreen(
     val success = uiState as? SessionSummaryUiState.Success
     val isStandardTest = success?.session?.testType == TestType.STANDARD
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var showExportMenu by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var exportStatusMessage by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+
+    val csvLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        if (uri != null) {
+            val os = context.contentResolver.openOutputStream(uri)
+            if (os != null) {
+                viewModel.exportSessionToStream(sessionId, com.example.chargetrack.domain.export.ExportFormat.CSV, os) { success, err ->
+                    exportStatusMessage = if (success) "Session exported as CSV successfully." else "CSV Export failed: $err"
+                }
+            }
+        }
+    }
+
+    val jsonLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            val os = context.contentResolver.openOutputStream(uri)
+            if (os != null) {
+                viewModel.exportSessionToStream(sessionId, com.example.chargetrack.domain.export.ExportFormat.JSON, os) { success, err ->
+                    exportStatusMessage = if (success) "Session exported as JSON successfully." else "JSON Export failed: $err"
+                }
+            }
+        }
+    }
+
+    val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
+
+    androidx.compose.runtime.LaunchedEffect(exportStatusMessage) {
+        exportStatusMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            exportStatusMessage = null
+        }
+    }
+
     Scaffold(
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -110,6 +154,33 @@ fun SessionSummaryScreen(
                     }
                     IconButton(onClick = { onNavigateToCharts(sessionId) }) {
                         Icon(Icons.Filled.Bolt, contentDescription = "Open charts", tint = AmberAccent)
+                    }
+
+                    Box {
+                        IconButton(onClick = { showExportMenu = true }) {
+                            Icon(Icons.Filled.FileUpload, contentDescription = "Export session", tint = Color.White)
+                        }
+
+                        androidx.compose.material3.DropdownMenu(
+                            expanded = showExportMenu,
+                            onDismissRequest = { showExportMenu = false },
+                            modifier = Modifier.background(CardBackground),
+                        ) {
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text("Export Raw CSV (Telemetry)", color = Color.White) },
+                                onClick = {
+                                    showExportMenu = false
+                                    csvLauncher.launch("chargetrack_${sessionId.take(8)}.csv")
+                                }
+                            )
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text("Export Complete JSON", color = Color.White) },
+                                onClick = {
+                                    showExportMenu = false
+                                    jsonLauncher.launch("chargetrack_${sessionId.take(8)}.json")
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

@@ -62,7 +62,8 @@ class HistoryViewModelTest {
             .build()
 
         repository = HistoryRepository(database)
-        viewModel = HistoryViewModel(repository, testDispatcher)
+        val exportImportRepository = com.example.chargetrack.data.export.ExportImportRepository(database)
+        viewModel = HistoryViewModel(repository, exportImportRepository, testDispatcher)
     }
 
     @After

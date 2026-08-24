@@ -11,6 +11,8 @@ data class HistoryUiState(
     val isLoading: Boolean = false,
     val isDeleteConfirmDialogOpen: Boolean = false,
     val pendingDeleteSessionId: String? = null,
+    val pendingDuplicatePayload: com.example.chargetrack.domain.export.ExportPayload? = null,
+    val importStatusMessage: String? = null,
 ) {
     val totalCount: Int
         get() = sessions.size
