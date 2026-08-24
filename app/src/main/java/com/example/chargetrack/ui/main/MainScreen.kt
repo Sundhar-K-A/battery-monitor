@@ -30,6 +30,7 @@ fun MainScreen(
     onNavigateToDiagnostics: () -> Unit,
     onNavigateToLiveSession: () -> Unit,
     onNavigateToStandardTest: () -> Unit = {},
+    onNavigateToHistory: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -73,6 +74,12 @@ fun MainScreen(
             Text("Live Session")
         }
         Spacer(Modifier.height(12.dp))
+        FilledTonalButton(onClick = onNavigateToHistory) {
+            Icon(Icons.Filled.Speed, contentDescription = null)
+            Spacer(Modifier.padding(horizontal = 4.dp))
+            Text("Charging History")
+        }
+        Spacer(Modifier.height(12.dp))
         FilledTonalButton(onClick = onNavigateToDiagnostics) {
             Icon(Icons.Filled.BatteryChargingFull, contentDescription = null)
             Spacer(Modifier.padding(horizontal = 4.dp))
@@ -89,6 +96,7 @@ fun MainScreenPreview() {
             onNavigateToDiagnostics = {},
             onNavigateToLiveSession = {},
             onNavigateToStandardTest = {},
+            onNavigateToHistory = {},
         )
     }
 }

@@ -26,6 +26,7 @@ fun MainNavigation() {
                     onNavigateToDiagnostics = { backStack.add(Diagnostics) },
                     onNavigateToLiveSession = { backStack.add(LiveSession) },
                     onNavigateToStandardTest = { backStack.add(StandardTestConfig) },
+                    onNavigateToHistory = { backStack.add(History) },
                     modifier = Modifier.safeDrawingPadding().padding(16.dp),
                 )
             }
@@ -47,6 +48,19 @@ fun MainNavigation() {
                         backStack.removeLastOrNull() // pop config
                         backStack.add(LiveSession) // push live session
                     },
+                )
+            }
+            entry<History> {
+                com.example.chargetrack.ui.history.HistoryScreen(
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                    onNavigateToSummary = { sessionId -> backStack.add(SessionSummaryDetail(sessionId)) },
+                )
+            }
+            entry<SessionSummaryDetail> { key ->
+                com.example.chargetrack.ui.summary.SessionSummaryScreen(
+                    sessionId = key.sessionId,
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                    onNavigateToCharts = { sessionId -> backStack.add(SessionCharts(sessionId)) },
                 )
             }
             entry<SessionCharts> { key ->

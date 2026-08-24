@@ -7,4 +7,6 @@ import kotlinx.serialization.Serializable
 @Serializable data object Diagnostics        : NavKey
 @Serializable data object LiveSession        : NavKey
 @Serializable data object StandardTestConfig : NavKey
+@Serializable data object History            : NavKey
 @Serializable data class SessionCharts(val sessionId: String) : NavKey
+@Serializable data class SessionSummaryDetail(val sessionId: String) : NavKey
